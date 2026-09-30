@@ -13,8 +13,9 @@ android {
         applicationId = "com.example"
         minSdk = 24
         targetSdk = 34
-        versionCode = (findProperty("VERSION_CODE") as String?)?.toIntOrNull() ?: 2
-        versionName = (findProperty("VERSION_NAME") as String?) ?: "1.1"
+        // CI (GitHub Actions) bisa menimpa lewat env VERSION_CODE / VERSION_NAME
+        versionCode = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 2
+        versionName = System.getenv("VERSION_NAME")?.takeIf { it.isNotBlank() } ?: "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -22,33 +23,35 @@ android {
         }
     }
 
-    // Signing release: dibaca dari environment (GitHub Secrets) atau gradle.properties lokal.
-    // Kalau tidak diisi, release ditandatangani dengan debug key supaya APK tetap bisa dipasang.
-    val releaseStoreFile: String? = System.getenv("KEYSTORE_FILE") ?: (findProperty("KEYSTORE_FILE") as String?)
-    val releaseStorePassword: String? = System.getenv("KEYSTORE_PASSWORD") ?: (findProperty("KEYSTORE_PASSWORD") as String?)
-    val releaseKeyAlias: String? = System.getenv("KEY_ALIAS") ?: (findProperty("KEY_ALIAS") as String?)
-    val releaseKeyPassword: String? = System.getenv("KEY_PASSWORD") ?: (findProperty("KEY_PASSWORD") as String?)
-    val hasReleaseKeystore = !releaseStoreFile.isNullOrBlank() &&
-        file(releaseStoreFile).exists() &&
-        !releaseStorePassword.isNullOrBlank() &&
-        !releaseKeyAlias.isNullOrBlank() &&
-        !releaseKeyPassword.isNullOrBlank()
+    // Signing release: dibaca dari env (GitHub Secrets). Kalau tidak ada keystore,
+    // APK release tetap dibuild dan ditandatangani dengan debug key supaya bisa diinstall.
+    val releaseKeystore = System.getenv("KEYSTORE_PATH")?.takeIf { it.isNotBlank() }?.let { file(it) }
+    val hasReleaseKeystore = releaseKeystore != null && releaseKeystore.exists()
 
     signingConfigs {
         if (hasReleaseKeystore) {
             create("release") {
-                storeFile = file(releaseStoreFile!!)
-                storePassword = releaseStorePassword
-                keyAlias = releaseKeyAlias
-                keyPassword = releaseKeyPassword
+                storeFile = releaseKeystore
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
             }
         }
     }
 
+    lint {
+        // Jangan gagalkan build release karena lint (izin sistem seperti WRITE_SECURE_SETTINGS dll)
+        abortOnError = false
+        checkReleaseBuilds = false
+    }
+
     buildTypes {
         release {
-            signingConfig = if (hasReleaseKeystore) signingConfigs.getByName("release")
-            else signingConfigs.getByName("debug")
+            signingConfig = if (hasReleaseKeystore) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -62,11 +65,6 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
-    }
-    lint {
-        // Build release di CI tidak boleh gagal hanya karena peringatan lint.
-        abortOnError = false
-        checkReleaseBuilds = false
     }
     buildFeatures {
         compose = true

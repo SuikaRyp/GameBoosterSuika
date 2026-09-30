@@ -43,6 +43,8 @@ class GameBoostService : Service() {
 
         // Antivirus tetap mengawasi aplikasi baru walau UI ditutup
         com.example.security.AntivirusManager.start(this)
+        // Game Booster Panel (edge swipe + overlay) — hanya membuat overlay saat ada game aktif
+        com.example.gamepanel.GamePanelController.init(this)
 
         // Re-detectar el juego en foreground al arrancar (Opción B): solo restaurar
         // boost si hay un juego en primer plano. Delay + re-intento porque la consulta
@@ -228,6 +230,18 @@ class GameBoostService : Service() {
                 }
             }
 
+            // Game Booster Panel: ikuti game yang sedang aktif (null = tidak ada)
+            launch {
+                try {
+                    repository.simulatedGame.collect { pkg ->
+                        com.example.gamepanel.GamePanelController.onGameChanged(pkg)
+                    }
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    Log.w(TAG, "GamePanel observer error: ${e.message}")
+                }
+            }
+
             // Observe active profile and update floating panel
             launch {
                 Log.d(TAG, "Starting profile observer")
@@ -337,6 +351,7 @@ class GameBoostService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         isRunning = false
+        com.example.gamepanel.GamePanelController.shutdown()
         monitorJob?.cancel()
         serviceScope.cancel()
         // Cancelar watchdog cuando el servicio se detiene intencionalmente

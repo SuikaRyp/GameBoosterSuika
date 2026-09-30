@@ -26,7 +26,7 @@ class BootReceiver : BroadcastReceiver() {
         Log.i(TAG, "📱 Dispositivo reiniciado. Verificando estado del servicio...")
 
         // Si el servicio estaba activo antes del reinicio, reprogramamos el watchdog
-        if (PreferenceManager.isServiceRunning(context)) {
+        if (PreferenceManager.isServiceRunning(context) || com.example.gamepanel.PanelSettings.autoStart(context)) {
             Log.i(TAG, "🔄 Servicio estaba activo. Reprogramando watchdog...")
 
             // Programar el watchdog para que revise en 30 segundos

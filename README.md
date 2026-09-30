@@ -219,19 +219,10 @@ MIT License
 
 </div>
 
-## 🏗️ Build APK Release lewat GitHub Actions
+## 🏗️ Build APK Release di GitHub
 
 Workflow: `.github/workflows/build-release.yml`
 
-- **Push ke `main`/`master`** atau **Actions → Build Release APK → Run workflow** → APK ada di *Artifacts* run tersebut.
-- **Push tag `v*`** (mis. `git tag v1.2 && git push origin v1.2`) → APK otomatis dilampirkan ke *Releases*.
-
-### Tanda tangan (opsional, disarankan)
-Tanpa secret, APK memakai debug key (bisa dipasang, tapi tanda tangan berubah tiap build sehingga tidak bisa di-update di atas versi sebelumnya). Untuk key tetap:
-
-```bash
-keytool -genkeypair -v -keystore release.jks -alias gameboost -keyalg RSA -keysize 2048 -validity 10000
-base64 -w0 release.jks   # salin hasilnya ke secret KEYSTORE_BASE64
-```
-
-Tambahkan di *Settings → Secrets and variables → Actions*: `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`. Simpan file `release.jks` dengan aman (jangan di-commit).
+- **Manual:** GitHub → tab **Actions** → *Build Release APK* → **Run workflow**. APK ada di *Artifacts*.
+- **Otomatis + Release:** `git tag v1.2 && git push origin v1.2` → APK otomatis terlampir di halaman **Releases**.
+- **Signing (opsional, disarankan):** tambahkan Secrets repo `KEYSTORE_BASE64` (`base64 -w0 release.jks`), `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`. Tanpa secrets, APK ditandatangani dengan debug key (tetap bisa diinstall, tapi tidak cocok untuk update jangka panjang).
