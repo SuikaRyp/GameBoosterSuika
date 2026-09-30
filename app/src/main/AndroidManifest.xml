@@ -18,7 +18,6 @@
     <!-- Antivirus: hapus aplikasi berbahaya & peringatan layar penuh -->
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
-    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
     <application
         android:allowBackup="true"
@@ -49,14 +48,6 @@
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Material.NoActionBar" />
 
-        <activity
-            android:name=".security.ThreatAlertActivity"
-            android:exported="false"
-            android:launchMode="singleTask"
-            android:showWhenLocked="true"
-            android:turnScreenOn="true"
-            android:screenOrientation="portrait"
-            android:excludeFromRecents="true" />
 
         <service
             android:name=".service.UnifiedAccessibilityService"

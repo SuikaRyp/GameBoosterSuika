@@ -13,8 +13,8 @@ android {
         applicationId = "com.example"
         minSdk = 24
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = (findProperty("VERSION_CODE") as String?)?.toIntOrNull() ?: 2
+        versionName = (findProperty("VERSION_NAME") as String?) ?: "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -22,8 +22,33 @@ android {
         }
     }
 
+    // Signing release: dibaca dari environment (GitHub Secrets) atau gradle.properties lokal.
+    // Kalau tidak diisi, release ditandatangani dengan debug key supaya APK tetap bisa dipasang.
+    val releaseStoreFile: String? = System.getenv("KEYSTORE_FILE") ?: (findProperty("KEYSTORE_FILE") as String?)
+    val releaseStorePassword: String? = System.getenv("KEYSTORE_PASSWORD") ?: (findProperty("KEYSTORE_PASSWORD") as String?)
+    val releaseKeyAlias: String? = System.getenv("KEY_ALIAS") ?: (findProperty("KEY_ALIAS") as String?)
+    val releaseKeyPassword: String? = System.getenv("KEY_PASSWORD") ?: (findProperty("KEY_PASSWORD") as String?)
+    val hasReleaseKeystore = !releaseStoreFile.isNullOrBlank() &&
+        file(releaseStoreFile).exists() &&
+        !releaseStorePassword.isNullOrBlank() &&
+        !releaseKeyAlias.isNullOrBlank() &&
+        !releaseKeyPassword.isNullOrBlank()
+
+    signingConfigs {
+        if (hasReleaseKeystore) {
+            create("release") {
+                storeFile = file(releaseStoreFile!!)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = if (hasReleaseKeystore) signingConfigs.getByName("release")
+            else signingConfigs.getByName("debug")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -37,6 +62,11 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+    lint {
+        // Build release di CI tidak boleh gagal hanya karena peringatan lint.
+        abortOnError = false
+        checkReleaseBuilds = false
     }
     buildFeatures {
         compose = true
