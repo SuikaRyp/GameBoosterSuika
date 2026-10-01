@@ -192,9 +192,10 @@ class TouchLockOverlay(private val ctx: Context, private val onUnlock: () -> Uni
         r.setBackgroundColor(Color.argb(1, 0, 0, 0))
         r.setOnTouchListener { _, _ -> true }
 
-        val btn = tv(ctx, "🔓  Tahan 1,5 dtk untuk membuka kunci", 12f, Pal.text, true).apply {
+        val btn = tv(ctx, "Tahan 1,5 dtk untuk membuka kunci", 12f, Pal.text, true).apply {
+            leftIcon(com.example.R.drawable.ic_unlock, Pal.text, 16)
             setPadding(ctx.dp(14), ctx.dp(10), ctx.dp(14), ctx.dp(10))
-            background = rounded(Color.argb(190, 11, 19, 38), ctx.dpf(20f), Pal.stroke, 1)
+            background = rounded(Color.argb(200, 15, 19, 24), ctx.dpf(20f), Pal.stroke, 1)
         }
         val hold = Runnable { hide(); onUnlock() }
         btn.setOnTouchListener { _, e ->
@@ -312,9 +313,10 @@ class HudOverlay(private val ctx: Context) {
             setPadding(ctx.dp(8), ctx.dp(6), ctx.dp(8), ctx.dp(6))
             text = "…"
         }
-        val d = tv(ctx, "✔ Selesai atur posisi", 11f, Color.BLACK, true).apply {
+        val d = tv(ctx, "Selesai atur posisi", 11f, Pal.onAccent, true).apply {
+            leftIcon(com.example.R.drawable.ic_check, Pal.onAccent, 14)
             setPadding(ctx.dp(8), ctx.dp(6), ctx.dp(8), ctx.dp(6))
-            background = rounded(Pal.cyan, ctx.dpf(8f))
+            background = rounded(Pal.ember, ctx.dpf(8f))
             visibility = View.GONE
             setOnClickListener { setEditMode(false) }
         }
@@ -430,16 +432,16 @@ class HudOverlay(private val ctx: Context) {
 // ════════════════════════════════════════════════════════════════════
 
 class BubbleOverlay(private val ctx: Context, private val onTap: () -> Unit) {
-    private var view: TextView? = null
+    private var view: View? = null
     private var lp: WindowManager.LayoutParams? = null
     val isShown: Boolean get() = view != null
 
     fun show() {
         if (view != null || !Settings.canDrawOverlays(ctx)) return
         val size = ctx.dp(48)
-        val v = tv(ctx, "🎮", 22f).apply {
-            gravity = Gravity.CENTER
-            background = rounded(Color.argb(225, 11, 19, 38), size / 2f, Pal.cyan, ctx.dp(2))
+        val v = iconView(ctx, com.example.R.drawable.ic_gamepad, 24, Pal.emberSoft).apply {
+            setPadding(ctx.dp(11), ctx.dp(11), ctx.dp(11), ctx.dp(11))
+            background = rounded(Color.argb(235, 15, 19, 24), size / 2f, Pal.ember, ctx.dp(2))
             elevation = ctx.dpf(6f)
         }
         val sz = realScreenSize(ctx)

@@ -63,7 +63,10 @@ class RamManager(
                 }
             }
 
-            // 2. Limpieza de cache segura (sin drop_caches)
+            // 2. Tutup proses cache latar belakang (aman; hanya yang boleh dibunuh sistem)
+            ShizukuExecutor.runCommand("am kill-all")
+
+            // 3. Limpieza de cache segura (sin drop_caches)
             cleanCache()
 
             // 3. GC

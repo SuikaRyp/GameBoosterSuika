@@ -14,6 +14,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.example.R
 import com.example.data.database.GameEntity
 import com.example.manager.ShizukuExecutor
 import com.example.security.AntivirusManager
@@ -49,7 +50,7 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
         fun permCard(p: Perm): View = card(ctx).apply {
             addView(tv(ctx, "Permission diperlukan untuk fitur ini", 13f, Pal.orange, true))
             addView(tv(ctx, "${p.title}: ${p.why}", 11.5f, Pal.muted).apply { setPadding(0, ctx.dp(4), 0, ctx.dp(8)) })
-            addView(button(ctx, "BERIKAN IZIN") {
+            addView(button(ctx, "Berikan izin") {
                 ToolActions.grant(ctx, p)
                 ctrl.closePanel()
             })
@@ -71,24 +72,24 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
         }
         fun hudHas(key: String) = ctrl.hudShown() && PanelSettings.hudMetric(ctx, key)
 
-        fun add(emoji: String, label: String, active: () -> Boolean = { false }, onClick: () -> Unit) {
-            val t = ToolTile(ctx, emoji, label) { onClick(); refresh() }
+        fun add(@androidx.annotation.DrawableRes icon: Int, label: String, active: () -> Boolean = { false }, onClick: () -> Unit) {
+            val t = ToolTile(ctx, icon, label) { onClick(); refresh() }
             tools.add(Tool(t, active))
         }
 
         // ── Layar ──
-        add("📸", "Tangkapan layar") {
+        add(R.drawable.ic_camera, "Tangkapan layar") {
             when (val r = ctrl.screenshot()) {
                 null -> {}
                 "NEED_A11Y" -> showDetail(permCard(Perm.ACCESSIBILITY))
                 else -> showDetail(info(r))
             }
         }
-        add("🎥", "Rekam layar", { ScreenRecordService.isRecording }) {
+        add(R.drawable.ic_record, "Rekam layar", { ScreenRecordService.isRecording }) {
             if (ScreenRecordService.isRecording) { ScreenRecordService.stop(ctx); showDetail(info("Rekaman dihentikan & disimpan")) }
             else { ToolActions.grant(ctx, Perm.PROJECTION); ctrl.closePanel() }
         }
-        add("🔆", "Kecerahan") {
+        add(R.drawable.ic_sun, "Kecerahan") {
             if (missing(Perm.WRITE_SETTINGS)) return@add
             showDetail(card(ctx).apply {
                 addView(seekRow(ctx, "Kecerahan", 1, 100, ToolActions.getBrightnessPct(ctx) ?: 50, { "$it%" }) {
@@ -96,30 +97,30 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
                 })
             })
         }
-        add("🔊", "Volume") {
+        add(R.drawable.ic_volume, "Volume") {
             showDetail(card(ctx).apply {
                 addView(seekRow(ctx, "Volume media", 0, 100, ToolActions.mediaVolumePct(ctx), { "$it%" }) {
                     ToolActions.setMediaVolumePct(ctx, it)
                 })
             })
         }
-        add("🔇", "Bisukan game", { ToolActions.isGameMuted(ctx) }) { ToolActions.toggleGameMute(ctx) }
-        add("🔒", "Kunci rotasi", { !ToolActions.autoRotateOn(ctx) }) {
+        add(R.drawable.ic_volume_off, "Bisukan game", { ToolActions.isGameMuted(ctx) }) { ToolActions.toggleGameMute(ctx) }
+        add(R.drawable.ic_rotate_lock, "Kunci rotasi", { !ToolActions.autoRotateOn(ctx) }) {
             if (missing(Perm.WRITE_SETTINGS)) return@add
             ToolActions.setAutoRotate(ctx, !ToolActions.autoRotateOn(ctx))
         }
-        add("🧭", "Orientasi: ${ctrl.orientationMode.lowercase()}", { ctrl.orientationMode != "AUTO" }) {
+        add(R.drawable.ic_compass, "Orientasi: ${ctrl.orientationMode.lowercase()}", { ctrl.orientationMode != "AUTO" }) {
             val m = ctrl.cycleOrientation()
             showDetail(info("Orientasi dikunci: $m (memakai jendela sistem 1×1 px; hasil bergantung ROM)"))
         }
-        add("☀️", "Layar tetap menyala", { PanelSettings.tool(ctx, "keep_awake") }) {
+        add(R.drawable.ic_monitor, "Layar tetap menyala", { PanelSettings.tool(ctx, "keep_awake") }) {
             val nv = !PanelSettings.tool(ctx, "keep_awake")
             PanelSettings.setTool(ctx, "keep_awake", nv)
             ctrl.applyOrientationAwake()
         }
 
         // ── Notifikasi & panggilan ──
-        add("🌙", "Jangan Ganggu", { PanelSettings.tool(ctx, "dnd") && ToolActions.isDndOn(ctx) }) {
+        add(R.drawable.ic_moon, "Jangan Ganggu", { PanelSettings.tool(ctx, "dnd") && ToolActions.isDndOn(ctx) }) {
             if (missing(Perm.DND)) return@add
             val nv = !(PanelSettings.tool(ctx, "dnd") && ToolActions.isDndOn(ctx))
             if (nv) ToolActions.setInterruption(ctx, NotificationManager.INTERRUPTION_FILTER_PRIORITY)
@@ -127,7 +128,7 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
             PanelSettings.setTool(ctx, "dnd", nv)
             PanelSettings.setTool(ctx, "notif_block", false)
         }
-        add("🔕", "Blokir notifikasi", { PanelSettings.tool(ctx, "notif_block") && ToolActions.isDndOn(ctx) }) {
+        add(R.drawable.ic_bell_off, "Blokir notifikasi", { PanelSettings.tool(ctx, "notif_block") && ToolActions.isDndOn(ctx) }) {
             if (missing(Perm.DND)) return@add
             val nv = !(PanelSettings.tool(ctx, "notif_block") && ToolActions.isDndOn(ctx))
             if (nv) ToolActions.setInterruption(ctx, NotificationManager.INTERRUPTION_FILTER_ALARMS)
@@ -136,14 +137,14 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
             PanelSettings.setTool(ctx, "dnd", false)
             showDetail(info(if (nv) "Notifikasi diblokir lewat mode Jangan Ganggu resmi (alarm tetap bunyi). Dipulihkan saat game selesai." else "Notifikasi kembali normal"))
         }
-        add("📵", "Tolak panggilan", { PanelSettings.tool(ctx, "call_block") }) {
+        add(R.drawable.ic_phone_off, "Tolak panggilan", { PanelSettings.tool(ctx, "call_block") }) {
             if (!ToolActions.callRoleSupported()) { showDetail(unavailable()); return@add }
             if (missing(Perm.CALL_ROLE)) return@add
             val nv = !PanelSettings.tool(ctx, "call_block")
             PanelSettings.setTool(ctx, "call_block", nv)
             showDetail(info(if (nv) "Panggilan masuk akan ditolak otomatis selama game berjalan" else "Penolak panggilan dimatikan"))
         }
-        add("🎯", "Prioritas game", { PanelSettings.tool(ctx, "game_priority") }) {
+        add(R.drawable.ic_target, "Prioritas game", { PanelSettings.tool(ctx, "game_priority") }) {
             val nv = !PanelSettings.tool(ctx, "game_priority")
             PanelSettings.setTool(ctx, "game_priority", nv)
             if (nv) AntivirusManager.stop(ctx)
@@ -152,19 +153,19 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
         }
 
         // ── Koneksi ──
-        add("📶", "Wi-Fi", { ToolActions.wifiOn(ctx) == true }) { showDetail(info(ToolActions.toggleWifi(ctx))); if (Build.VERSION.SDK_INT >= 29) ctrl.closePanel() }
-        add("🔵", "Bluetooth", { ToolActions.bluetoothOn(ctx) == true }) { showDetail(info(ToolActions.openBluetooth(ctx))); ctrl.closePanel() }
+        add(R.drawable.ic_wifi, "Wi-Fi", { ToolActions.wifiOn(ctx) == true }) { showDetail(info(ToolActions.toggleWifi(ctx))); if (Build.VERSION.SDK_INT >= 29) ctrl.closePanel() }
+        add(R.drawable.ic_bluetooth, "Bluetooth", { ToolActions.bluetoothOn(ctx) == true }) { showDetail(info(ToolActions.openBluetooth(ctx))); ctrl.closePanel() }
 
         // ── Sentuhan ──
-        add("🔐", "Kunci sentuh") { ctrl.showTouchLock() }
-        add("✋", "Cegah salah sentuh", { PanelSettings.touchProtection(ctx) != Level.OFF || PanelSettings.edgeProtection(ctx) != Level.OFF }) {
+        add(R.drawable.ic_lock, "Kunci sentuh") { ctrl.showTouchLock() }
+        add(R.drawable.ic_shield_touch, "Cegah salah sentuh", { PanelSettings.touchProtection(ctx) != Level.OFF || PanelSettings.edgeProtection(ctx) != Level.OFF }) {
             val on = PanelSettings.touchProtection(ctx) != Level.OFF || PanelSettings.edgeProtection(ctx) != Level.OFF
             PanelSettings.setTouchProtection(ctx, if (on) Level.OFF else Level.MEDIUM)
             PanelSettings.setEdgeProtection(ctx, if (on) Level.OFF else Level.MEDIUM)
             ctrl.applyGuards()
             showDetail(info(if (on) "Proteksi sentuhan dimatikan" else "Proteksi sentuhan & tepi: MEDIUM. Atur detail di tab Sentuhan."))
         }
-        add("👉", "Tampilkan sentuhan", { ToolActions.showTouchesOn(ctx) }) {
+        add(R.drawable.ic_pointer, "Tampilkan sentuhan", { ToolActions.showTouchesOn(ctx) }) {
             host.scope.launch {
                 val target = !ToolActions.showTouchesOn(ctx)
                 val ok = ToolActions.setShowTouches(ctx, target)
@@ -175,32 +176,32 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
         }
 
         // ── Performa & monitor ──
-        add("⚡", "Mode: ${PanelSettings.activeMode(ctx).label}") { host.openTab(PanelTab.PERF) }
-        add("🔋", "Mode baterai", { PanelMonitor.currentMode() == PerfMode.HEMAT }) {
+        add(R.drawable.ic_zap, "Mode: ${PanelSettings.activeMode(ctx).label}") { host.openTab(PanelTab.PERF) }
+        add(R.drawable.ic_battery, "Mode baterai", { PanelMonitor.currentMode() == PerfMode.HEMAT }) {
             ctrl.setMode(if (PanelMonitor.currentMode() == PerfMode.HEMAT) PerfMode.SEIMBANG else PerfMode.HEMAT)
         }
-        add("🌐", "Monitor jaringan") { host.openTab(PanelTab.NET) }
-        add("🎞️", "Monitor FPS", { hudHas("fps") }) { toggleHudMetric("fps") }
-        add("🧠", "Monitor RAM", { hudHas("ram") }) { toggleHudMetric("ram") }
-        add("🖥️", "Monitor CPU", { hudHas("cpu") }) { toggleHudMetric("cpu") }
-        add("🌡️", "Monitor suhu", { hudHas("temp") }) { toggleHudMetric("temp") }
-        add("📊", "HUD", { ctrl.hudShown() }) {
+        add(R.drawable.ic_globe, "Monitor jaringan") { host.openTab(PanelTab.NET) }
+        add(R.drawable.ic_film, "Monitor FPS", { hudHas("fps") }) { toggleHudMetric("fps") }
+        add(R.drawable.ic_memory, "Monitor RAM", { hudHas("ram") }) { toggleHudMetric("ram") }
+        add(R.drawable.ic_cpu, "Monitor CPU", { hudHas("cpu") }) { toggleHudMetric("cpu") }
+        add(R.drawable.ic_thermo, "Monitor suhu", { hudHas("temp") }) { toggleHudMetric("temp") }
+        add(R.drawable.ic_chart, "HUD", { ctrl.hudShown() }) {
             val nv = !ctrl.hudShown()
             PanelSettings.setHudEnabled(ctx, nv)
             ctrl.setHud(nv)
         }
 
         // ── Utilitas ──
-        add("📝", "Catatan cepat") { showDetail(MiniTools.notes(ctx, host)) }
-        add("⏱️", "Timer") { showDetail(MiniTools.timer(ctx)) }
-        add("⏲️", "Stopwatch") { showDetail(MiniTools.stopwatch(ctx)) }
-        add("🧮", "Kalkulator") { showDetail(MiniTools.calculator(ctx)) }
-        add("➕", "Crosshair", { PanelSettings.tool(ctx, "cross") }) {
+        add(R.drawable.ic_note, "Catatan cepat") { showDetail(MiniTools.notes(ctx, host)) }
+        add(R.drawable.ic_timer, "Timer") { showDetail(MiniTools.timer(ctx)) }
+        add(R.drawable.ic_stopwatch, "Stopwatch") { showDetail(MiniTools.stopwatch(ctx)) }
+        add(R.drawable.ic_calculator, "Kalkulator") { showDetail(MiniTools.calculator(ctx)) }
+        add(R.drawable.ic_crosshair, "Crosshair", { PanelSettings.tool(ctx, "cross") }) {
             val on = ctrl.toggleCrosshair()
             showDetail(info(if (on) "Crosshair aktif di tengah layar. Catatan: sebagian game melarang overlay pembidik — pakai dengan risiko sendiri."
             else "Crosshair dimatikan"))
         }
-        add("🫧", "Bubble mengambang") { ctrl.minimize() }
+        add(R.drawable.ic_bubble, "Bubble mengambang") { ctrl.minimize() }
 
         // Susun grid: 4 kolom jika lebar cukup, kalau tidak 3
         val contentDp = (realScreenSize(ctx).x * PanelSettings.panelSizePercent(ctx) / 100f) / ctx.resources.displayMetrics.density - 84f
@@ -270,7 +271,7 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
         // Kartu info
         fun infoCard(title: String, producer: (PerfSnapshot) -> String) {
             val c = card(ctx)
-            c.addView(tv(ctx, title.uppercase(), 11f, Pal.cyanSoft, true))
+            c.addView(tv(ctx, title, 12f, Pal.muted, true))
             val body = tv(ctx, "…", 12f, Pal.text).apply { setPadding(0, ctx.dp(4), 0, 0); setLineSpacing(ctx.dpf(2f), 1f) }
             c.addView(body)
             root.addView(c)
@@ -313,7 +314,7 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
         // Riwayat
         root.addView(sectionTitle(ctx, "Riwayat singkat"))
         val hist = card(ctx)
-        val cpuS = SparklineView(ctx, "CPU", "%", Pal.cyan)
+        val cpuS = SparklineView(ctx, "CPU", "%", Pal.ember)
         val ramS = SparklineView(ctx, "RAM", "%", Pal.green)
         val tmpS = SparklineView(ctx, "Suhu", "°C", Pal.orange)
         val batS = SparklineView(ctx, "Baterai", "%", Pal.yellow)
@@ -343,13 +344,13 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
     fun networkPage(): View {
         val root = vbox(ctx)
         val liveCard = card(ctx)
-        liveCard.addView(tv(ctx, "STATUS JARINGAN", 11f, Pal.cyanSoft, true))
+        liveCard.addView(tv(ctx, "STATUS JARINGAN", 11f, Pal.emberSoft, true))
         val live = tv(ctx, "…", 12f, Pal.text).apply { setPadding(0, ctx.dp(4), 0, 0); setLineSpacing(ctx.dpf(2f), 1f) }
         liveCard.addView(live)
         root.addView(liveCard)
 
         val resCard = card(ctx)
-        resCard.addView(tv(ctx, "HASIL TES", 11f, Pal.cyanSoft, true))
+        resCard.addView(tv(ctx, "HASIL TES", 11f, Pal.emberSoft, true))
         val res = tv(ctx, "", 12f, Pal.text).apply { setPadding(0, ctx.dp(4), 0, 0); setLineSpacing(ctx.dpf(2f), 1f) }
         resCard.addView(res)
         root.addView(resCard)
@@ -361,7 +362,7 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
                 "Min / Maks: ${f(r.latencyMinMs, "ms")} / ${f(r.latencyMaxMs, "ms")}\n" +
                 "Packet loss: ${f(r.lossPct, "%")}\n" +
                 "Download: ${f(r.downloadMbps, "Mbps")}\nUpload: ${f(r.uploadMbps, "Mbps")}\n" +
-                "Metode ping: ${r.method}" + (r.error?.let { "\n⚠ $it" } ?: "")
+                "Metode ping: ${r.method}" + (r.error?.let { "\nCatatan: $it" } ?: "")
         }
         render(ctrl.lastNet)
 
@@ -411,7 +412,7 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
         val root = vbox(ctx)
 
         val infoC = card(ctx)
-        infoC.addView(tv(ctx, "INFORMASI SENTUHAN", 11f, Pal.cyanSoft, true))
+        infoC.addView(tv(ctx, "INFORMASI SENTUHAN", 11f, Pal.emberSoft, true))
         val ts = touchscreenInfo()
         val hz = PanelMonitor.snapshot.value?.refreshHz
         val pointer = try { Settings.System.getInt(ctx.contentResolver, "pointer_speed") } catch (e: Exception) { null }
@@ -428,7 +429,7 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
             Segmented(ctx, levels.map { it.label }, levels.indexOf(cur), Pal.accent(PanelSettings.theme(ctx))) { onSel(levels[it]) }
 
         val prot = card(ctx)
-        prot.addView(tv(ctx, "PROTEKSI SENTUHAN (gestur atas/bawah)", 11f, Pal.cyanSoft, true))
+        prot.addView(tv(ctx, "PROTEKSI SENTUHAN (gestur atas/bawah)", 11f, Pal.emberSoft, true))
         prot.addView(tv(ctx, "Menelan sentuhan di tepi atas & bawah agar swipe sistem (panel notifikasi, home) tidak terpicu tak sengaja. Lebar: LOW 12 dp · MEDIUM 24 dp · HIGH 40 dp.", 11f, Pal.muted).apply { setPadding(0, ctx.dp(4), 0, ctx.dp(6)) })
         prot.addView(levelSeg(PanelSettings.touchProtection(ctx)) {
             PanelSettings.setTouchProtection(ctx, it); ctrl.applyGuards()
@@ -436,7 +437,7 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
         root.addView(prot)
 
         val edge = card(ctx)
-        edge.addView(tv(ctx, "PROTEKSI TEPI (kiri & kanan)", 11f, Pal.cyanSoft, true))
+        edge.addView(tv(ctx, "PROTEKSI TEPI (kiri & kanan)", 11f, Pal.emberSoft, true))
         edge.addView(tv(ctx, "Menelan sentuhan telapak di sisi layar. Perhatian: tombol game yang persis di tepi bisa ikut terblokir — turunkan level jika terasa.", 11f, Pal.muted).apply { setPadding(0, ctx.dp(4), 0, ctx.dp(6)) })
         edge.addView(levelSeg(PanelSettings.edgeProtection(ctx)) {
             PanelSettings.setEdgeProtection(ctx, it); ctrl.applyGuards()
@@ -444,7 +445,7 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
         root.addView(edge)
 
         val act = card(ctx)
-        act.addView(tv(ctx, "PERLINDUNGAN GESTUR", 11f, Pal.cyanSoft, true))
+        act.addView(tv(ctx, "PERLINDUNGAN GESTUR", 11f, Pal.emberSoft, true))
         act.addView(tv(ctx, "Kunci sentuh menutup seluruh layar; buka dengan menahan tombol 1,5 detik.", 11f, Pal.muted).apply { setPadding(0, ctx.dp(4), 0, ctx.dp(8)) })
         act.addView(button(ctx, "KUNCI SENTUH SEKARANG") { ctrl.showTouchLock() })
         root.addView(act)
@@ -501,7 +502,7 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
             var gp = GameProfileStore.get(ctx, g.packageName, g.displayName)
             fun save(n: GameProfile) { gp = n; ctrl.updateProfile(n) }
             val c = card(ctx)
-            c.addView(tv(ctx, "PROFIL: ${g.displayName}", 11f, Pal.cyanSoft, true))
+            c.addView(tv(ctx, "PROFIL: ${g.displayName}", 11f, Pal.emberSoft, true))
             c.addView(tv(ctx, g.packageName, 9.5f, Pal.muted).apply { setPadding(0, 0, 0, ctx.dp(6)) })
 
             val modes = PerfMode.values()
@@ -593,22 +594,22 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
 
         // Izin
         val perm = card(ctx)
-        perm.addView(tv(ctx, "IZIN", 11f, Pal.cyanSoft, true))
+        perm.addView(tv(ctx, "IZIN", 11f, Pal.emberSoft, true))
         fun permRow(p: Perm) {
             val ok = ToolActions.has(ctx, p)
             val r = hbox(ctx).apply { setPadding(0, ctx.dp(4), 0, ctx.dp(4)) }
-            r.addView(tv(ctx, (if (ok) "✅ " else "⚠️ ") + p.title, 12f, if (ok) Pal.text else Pal.orange), lp(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-            if (!ok) r.addView(button(ctx, "BERIKAN IZIN", false) { ToolActions.grant(ctx, p); ctrl.closePanel() })
+            r.addView(tv(ctx, p.title, 12f, if (ok) Pal.text else Pal.orange).also { it.leftIcon(if (ok) R.drawable.ic_check_circle else R.drawable.ic_alert, if (ok) Pal.green else Pal.orange, 16) }, lp(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+            if (!ok) r.addView(button(ctx, "Berikan izin", false) { ToolActions.grant(ctx, p); ctrl.closePanel() })
             perm.addView(r)
         }
         for (p in listOf(Perm.OVERLAY, Perm.WRITE_SETTINGS, Perm.DND, Perm.ACCESSIBILITY)) permRow(p)
         if (ToolActions.callRoleSupported()) permRow(Perm.CALL_ROLE)
-        perm.addView(tv(ctx, "Shizuku: ${if (ShizukuExecutor.isReady()) "✅ siap (FPS, CPU, GPU bisa dibaca)" else "belum aktif — FPS & sebagian metrik menampilkan N/A"}", 11.5f, Pal.muted).apply { setPadding(0, ctx.dp(4), 0, 0) })
+        perm.addView(tv(ctx, "Shizuku: ${if (ShizukuExecutor.isReady()) "siap (FPS, CPU, GPU bisa dibaca)" else "belum aktif — FPS & sebagian metrik menampilkan N/A"}", 11.5f, Pal.muted).apply { setPadding(0, ctx.dp(4), 0, 0) })
         root.addView(perm)
 
         // Edge swipe
         val edge = card(ctx)
-        edge.addView(tv(ctx, "EDGE SWIPE (kanan → kiri)", 11f, Pal.cyanSoft, true))
+        edge.addView(tv(ctx, "EDGE SWIPE (kanan → kiri)", 11f, Pal.emberSoft, true))
         edge.addView(switchRow(ctx, "Aktifkan edge swipe", "Aktif hanya saat game berjalan", PanelSettings.edgeEnabled(ctx)) {
             PanelSettings.setEdgeEnabled(ctx, it); ctrl.applyGuards()
         })
@@ -625,13 +626,13 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
 
         // Panel
         val pan = card(ctx)
-        pan.addView(tv(ctx, "TAMPILAN PANEL", 11f, Pal.cyanSoft, true))
+        pan.addView(tv(ctx, "TAMPILAN PANEL", 11f, Pal.emberSoft, true))
         pan.addView(seekRow(ctx, "Opasitas panel", 40, 100, PanelSettings.panelOpacity(ctx), { "$it%" }) { PanelSettings.setPanelOpacity(ctx, it) })
         pan.addView(seekRow(ctx, "Ukuran panel", 40, 90, PanelSettings.panelSizePercent(ctx), { "$it%" }) { PanelSettings.setPanelSizePercent(ctx, it) })
         pan.addView(seekRow(ctx, "Kecepatan animasi", 1, 3, PanelSettings.animSpeed(ctx), { when (it) { 1 -> "Lambat"; 3 -> "Cepat"; else -> "Normal" } }) { PanelSettings.setAnimSpeed(ctx, it) })
         val themes = listOf("cyan", "green", "orange", "purple")
         pan.addView(tv(ctx, "Tema aksen", 13f, Pal.text, true).apply { setPadding(0, ctx.dp(6), 0, ctx.dp(4)) })
-        pan.addView(Segmented(ctx, listOf("Cyan", "Hijau", "Oranye", "Ungu"), themes.indexOf(PanelSettings.theme(ctx)).coerceAtLeast(0), accent) {
+        pan.addView(Segmented(ctx, listOf("Api", "Hijau", "Emas", "Biru"), themes.indexOf(PanelSettings.theme(ctx)).coerceAtLeast(0), accent) {
             PanelSettings.setTheme(ctx, themes[it]); ctrl.refreshHudStyle()
         }.view)
         pan.addView(tv(ctx, "Opasitas & ukuran berlaku saat panel dibuka lagi.", 10.5f, Pal.muted).apply { setPadding(0, ctx.dp(4), 0, 0) })
@@ -639,7 +640,7 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
 
         // HUD
         val hud = card(ctx)
-        hud.addView(tv(ctx, "HUD PERFORMA", 11f, Pal.cyanSoft, true))
+        hud.addView(tv(ctx, "HUD PERFORMA", 11f, Pal.emberSoft, true))
         hud.addView(switchRow(ctx, "Tampilkan HUD", "Tidak menghalangi sentuhan ke game", PanelSettings.hudEnabled(ctx)) {
             PanelSettings.setHudEnabled(ctx, it); ctrl.setHud(it)
         })
@@ -667,7 +668,7 @@ class PanelPages(private val ctx: Context, private val host: PanelWindow) {
 
         // Umum
         val gen = card(ctx)
-        gen.addView(tv(ctx, "UMUM", 11f, Pal.cyanSoft, true))
+        gen.addView(tv(ctx, "UMUM", 11f, Pal.emberSoft, true))
         gen.addView(switchRow(ctx, "Layanan otomatis saat boot", "Panel siap tanpa membuka aplikasi", PanelSettings.autoStart(ctx)) { PanelSettings.setAutoStart(ctx, it) })
         val modes = PerfMode.values()
         gen.addView(tv(ctx, "Mode performa bawaan", 13f, Pal.text, true).apply { setPadding(0, ctx.dp(6), 0, ctx.dp(4)) })

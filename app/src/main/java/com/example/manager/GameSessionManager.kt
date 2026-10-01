@@ -1,6 +1,7 @@
 package com.example.manager
 
 import android.annotation.SuppressLint
+import com.example.ui.stripEmoji
 import android.content.Context
 import android.util.Log
 import com.example.data.PreferenceManager
@@ -108,6 +109,9 @@ class GameSessionManager(
             log = { level, tag, msg -> addLog(level, tag, msg) }
         )
 
+    // Tweak performa nyata (Data Saver, Game Mode, am kill-all) — backup persisten di prefs
+    private val perfTweaks = PerformanceTweaks(context) { level, tag, msg -> addLog(level, tag, msg) }
+
     // Para acceder al FloatingPanelManager desde el service
     var floatingPanelManager: FloatingPanelManager? = null
 
@@ -130,6 +134,9 @@ class GameSessionManager(
                 PreferenceManager.purgeLegacyGlobalManualProfile(context)
                 checkRealShizuku()
                 fetchAvailableGovernors()
+                // Sesi sebelumnya mati sebelum restore? Kembalikan Data Saver/Game Mode sekarang
+                // (hanya kalau tidak sedang boost).
+                if (!_isBoostActive.value && ShizukuExecutor.isReady()) perfTweaks.restoreIfDirty()
                 isReady = true
                 _fsmState.value = FsmState.READY
                 Log.d(TAG, "✅ GameSessionManager inicializado")
@@ -258,10 +265,12 @@ class GameSessionManager(
     }
 
     private fun applyBoostSettings() {
-        val msaaEnabled = isMsaaEnabled()
         touchOptimizer.applyOptimization(sensitivity = 10, isGamingMode = true)
         networkOptimizer.apply()
-        systemTweaks.apply(enableMsaa = msaaEnabled)
+        systemTweaks.apply()
+        // Data Saver + am kill-all (game + app ini di-whitelist dari Data Saver)
+        val gamePkg = _simulatedGame.value
+        scope.launch { perfTweaks.applyBoost(gamePkg) }
 
         scope.launch {
             delay(5000)
@@ -400,6 +409,7 @@ class GameSessionManager(
         touchOptimizer.restore()
         networkOptimizer.restore()
         systemTweaks.restore()
+        scope.launch { perfTweaks.restore() }
         scope.launch {
             val commands = listOf(
                 "settings put global window_animation_scale 1",
@@ -581,37 +591,13 @@ class GameSessionManager(
 
     }
 
-    @SuppressLint("SoonDeprecated")
+    /** Game Mode PERFORMANCE nyata via `cmd game` (Android 12+); dipulihkan lewat reset. */
     private fun enableGameMode(packageName: String) {
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) return
-        try {
-            val gameManager = context.getSystemService(Context.GAME_SERVICE) as android.app.GameManager
-            val method = gameManager::class.java.getMethod(
-                "setGameState",
-                String::class.java,
-                Boolean::class.javaPrimitiveType ?: Boolean::class.java
-            )
-            method.invoke(gameManager, packageName, true)
-            addLog("DEBUG", "GameMode", "Game Mode API diaktifkan untuk $packageName")
-        } catch (e: NoSuchMethodException) {
-            addLog("WARN", "GameMode", "setGameState tidak ditemukan")
-        } catch (e: Exception) {
-            addLog("WARN", "GameMode", "Error: ${e.message}")
-        }
+        scope.launch { perfTweaks.setGameMode(packageName, true) }
     }
 
-    @SuppressLint("SoonDeprecated")
     private fun disableGameMode(packageName: String) {
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) return
-        try {
-            val gameManager = context.getSystemService(Context.GAME_SERVICE) as android.app.GameManager
-            val method = gameManager::class.java.getMethod(
-                "setGameState",
-                String::class.java,
-                Boolean::class.javaPrimitiveType ?: Boolean::class.java
-            )
-            method.invoke(gameManager, packageName, false)
-        } catch (_: Exception) {}
+        scope.launch { perfTweaks.setGameMode(packageName, false) }
     }
 
     // ─── Exit with Hysteresis ─────────────────────────────────────
@@ -969,7 +955,7 @@ class GameSessionManager(
         val timestamp = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
             .format(java.util.Date())
         scope.launch {
-            logDao.insertLog(LogEntity(timestamp = timestamp, level = level, tag = tag, message = message))
+            logDao.insertLog(LogEntity(timestamp = timestamp, level = level, tag = tag, message = message.stripEmoji()))
             Log.d(tag, "[$level] $message")
         }
     }

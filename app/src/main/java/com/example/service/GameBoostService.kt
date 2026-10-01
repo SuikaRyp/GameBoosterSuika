@@ -135,7 +135,7 @@ class GameBoostService : Service() {
         currentProfile = ProfileManager.getCurrentProfile()
         ProfileManager.applyProfile(currentProfile)
         restoreSavedSettings()
-        updateNotification("Profil Aktif: ${currentProfile.displayName}")
+        updateNotification("Profil Aktif: ${currentProfile.label}")
         
         // Asegurar que el overlay se muestre si el boost ya está activo
         // (ej: cuando el servicio es reiniciado por el watchdog)
@@ -205,7 +205,7 @@ class GameBoostService : Service() {
     private fun handleProfileChange(profile: ProfileManager.ProfileType) {
         currentProfile = profile
         ProfileManager.applyProfile(profile)
-        updateNotification("Profil Aktif: ${profile.displayName}")
+        updateNotification("Profil Aktif: ${profile.label}")
         onProfileChanged?.invoke(profile)
         FloatingPanelManager.getInstance(this).updateProfile(profile)
     }
@@ -278,7 +278,7 @@ class GameBoostService : Service() {
                                     currentProfile = it
                                     ProfileManager.applyProfile(it)
                                     FloatingPanelManager.getInstance(this@GameBoostService).updateProfile(it)
-                                    updateNotification("Profil Aktif: ${it.displayName}")
+                                    updateNotification("Profil Aktif: ${it.label}")
                                 }
                             }
                         }

@@ -55,42 +55,31 @@ class SystemTweaks(
 
     // ── Comandos apply ───────────────────────────────────────────
 
-    private fun getApplyCommands(enableMsaa: Boolean = false): List<String> = buildList {
-        // --- Conectividad y Escaneo ---
+    /**
+     * Hanya setting yang benar-benar dibaca Android (efek nyata). Dibuang karena tidak berefek:
+     * `debug.hwui.*`, `debug.sf.*`, `debug.gl.msaa` (itu system property, bukan Settings.Global —
+     * `settings put global` tidak mengubahnya), `overlay_display_devices`, `adaptive_connected_voice_enabled`.
+     * Dibuang karena berisiko: `bluetooth_disabled_profiles` (bisa memutus audio Bluetooth).
+     */
+    private fun getApplyCommands(@Suppress("UNUSED_PARAMETER") enableMsaa: Boolean = false): List<String> = buildList {
+        // Hentikan scan latar BLE / Wi-Fi (kurangi wakeup radio & CPU)
         add("settings put global ble_scan_always_enabled 0")
         add("settings put global wifi_scan_always_enabled 0")
-        add("settings put global bluetooth_disabled_profiles 1")
 
-        // --- Gráficos y Renderizado ---
-        add("settings put global overlay_display_devices 0")
-        add("settings put global debug.hwui.renderer skiavk")
-        add("settings put global debug.hwui.overdraw false")
-        add("settings put global debug.hwui.show_dirty_regions false")
-        add("settings put global debug.sf.disable_backpressure 1")
-        add("settings put global debug.sf.latch_unsignaled 1")
+        // Blur jendela = beban GPU/compositor (Android 12+)
         add("settings put global disable_window_blurs 1")
-        add("settings put global debug.sf.disable_hwc_vds 1")
 
-        // --- Interfaz y Animaciones ---
+        // Animasi UI off
         add("settings put global auto_sync 0")
         add("settings put global window_animation_scale 0")
         add("settings put global transition_animation_scale 0")
         add("settings put global animator_duration_scale 0")
         add("settings put global send_action_app_error 0")
 
-        // --- Optimizaciones de Proceso ---
-        // activity_manager_constants es un blob de key=value; lo sobrescribimos
-        // con solo max_cached_processes para el boost.
+        // Lebih banyak proses cached dipertahankan → app tidak sering di-reload (RAM cukup)
         add("settings put global activity_manager_constants max_cached_processes=128")
+        // Jangan biarkan Battery Saver memotong performa di tengah game
         add("settings put global low_power_trigger_level 0")
-
-        // --- Bienestar Digital ---
-        add("settings put global adaptive_connected_voice_enabled 0")
-
-        // --- MSAA (opcional, GPU-intensive) ---
-        if (enableMsaa) {
-            add("settings put global debug.gl.msaa 4")
-        }
     }
 
     // ── API Pública ──────────────────────────────────────────────
@@ -104,7 +93,7 @@ class SystemTweaks(
     fun apply(enableMsaa: Boolean = false) {
         repository.logAsync(
             "INFO", "SysTweaks",
-            "⚡ Menerapkan pengaturan sistem (Blur/V-Sync/MSAA/DigitalWellbeing)... MSAA=${if (enableMsaa) "ON" else "OFF"}"
+            "Menerapkan pengaturan sistem (blur, animasi, scan latar, sinkronisasi)..."
         )
         scope.launch {
             backupOriginalValues()
@@ -152,13 +141,8 @@ class SystemTweaks(
 
         line("BLE Scan", "settings get global ble_scan_always_enabled")
         line("WiFi Scan Always", "settings get global wifi_scan_always_enabled")
-        line("BT Disabled Profiles", "settings get global bluetooth_disabled_profiles")
-        line("HW Overlays", "settings get global overlay_display_devices")
         line("Auto Sync", "settings get global auto_sync")
         line("Window Blurs", "settings get global disable_window_blurs")
-        line("V-Sync (disable_hwc_vds)", "settings get global debug.sf.disable_hwc_vds")
-        line("Digital Wellbeing voice", "settings get global adaptive_connected_voice_enabled")
-        line("MSAA", "settings get global debug.gl.msaa")
         line("window_animation_scale", "settings get global window_animation_scale")
         line("transition_animation_scale", "settings get global transition_animation_scale")
         line("animator_duration_scale", "settings get global animator_duration_scale")
@@ -209,22 +193,13 @@ class SystemTweaks(
                 when (key) {
                     "ble_scan_always_enabled" -> add("settings put global $key 1")
                     "wifi_scan_always_enabled" -> add("settings put global $key 1")
-                    "bluetooth_disabled_profiles" -> add("settings put global $key 0")
-                    "overlay_display_devices" -> add("settings put global $key 1")
                     "auto_sync" -> add("settings put global $key 1")
                     "disable_window_blurs" -> add("settings put global $key 0")
-                    "debug.sf.disable_hwc_vds" -> add("settings put global $key 0")
-                    "adaptive_connected_voice_enabled" -> add("settings put global $key 1")
-                    "debug.gl.msaa" -> add("settings put global $key 0")
                     "window_animation_scale",
                     "transition_animation_scale",
                     "animator_duration_scale" -> add("settings put global $key 1.0")
                     "send_action_app_error" -> add("settings put global $key 1")
                     "low_power_trigger_level" -> add("settings put global $key 15")
-                    "debug.hwui.overdraw" -> add("settings put global $key false")
-                    "debug.hwui.show_dirty_regions" -> add("settings put global $key false")
-                    "debug.sf.disable_backpressure" -> add("settings put global $key 0")
-                    "debug.sf.latch_unsignaled" -> add("settings put global $key 0")
                     // activity_manager_constants y debug.hwui.renderer: ver abajo
                     else -> { /* no-op */ }
                 }
@@ -233,22 +208,13 @@ class SystemTweaks(
 
         put("ble_scan_always_enabled", originalBleScan)
         put("wifi_scan_always_enabled", originalWifiScanAlways)
-        put("bluetooth_disabled_profiles", originalBtDisabledProfiles)
-        put("overlay_display_devices", originalHwOverlays)
         put("auto_sync", originalAutoSync)
         put("disable_window_blurs", originalWindowBlurs)
-        put("debug.sf.disable_hwc_vds", originalVsync)
-        put("adaptive_connected_voice_enabled", originalDigitalWellbeing)
-        put("debug.gl.msaa", originalMsaa)
         put("window_animation_scale", originalWindowAnim)
         put("transition_animation_scale", originalTransitionAnim)
         put("animator_duration_scale", originalAnimatorDuration)
         put("send_action_app_error", originalSendActionAppError)
         put("low_power_trigger_level", originalLowPowerTrigger)
-        put("debug.hwui.overdraw", originalHwuiOverdraw)
-        put("debug.hwui.show_dirty_regions", originalHwuiDirtyRegions)
-        put("debug.sf.disable_backpressure", originalSfBackpressure)
-        put("debug.sf.latch_unsignaled", originalSfLatch)
 
         // activity_manager_constants: restaurar valor completo o borrar
         if (originalActivityManagerConstants != null) {
@@ -257,12 +223,13 @@ class SystemTweaks(
             add("settings delete global activity_manager_constants")
         }
 
-        // debug.hwui.renderer: si no había valor, mejor borrar (dejar default del sistema)
-        if (originalHwuiRenderer != null) {
-            add("settings put global debug.hwui.renderer $originalHwuiRenderer")
-        } else {
-            add("settings delete global debug.hwui.renderer")
-        }
+        // Bersihkan sisa key "sampah" yang ditulis versi lama (system property salah dikirim lewat
+        // Settings.Global — tidak berefek tapi mengotori database settings). Idempotent.
+        for (junk in listOf(
+            "debug.hwui.renderer", "debug.hwui.overdraw", "debug.hwui.show_dirty_regions",
+            "debug.sf.disable_backpressure", "debug.sf.latch_unsignaled",
+            "debug.sf.disable_hwc_vds", "debug.gl.msaa"
+        )) add("settings delete global $junk")
     }
 
     private suspend fun applyTweaks(enableMsaa: Boolean = false) {
@@ -285,7 +252,7 @@ class SystemTweaks(
                     } else {
                         repository.logAsync(
                             "WARN", "SysTweaks",
-                            "🔍 Verifikasi: $verifyKey diharapkan=$expectedValue, aktual=$actualValue ⚠️"
+                            "Verifikasi: $verifyKey diharapkan=$expectedValue, aktual=$actualValue"
                         )
                     }
                 }
@@ -293,7 +260,7 @@ class SystemTweaks(
                 failCount++
                 repository.logAsync(
                     "WARN", "SysTweaks",
-                    "❌ Gagal: ${cmd.take(60)} — ${result.exceptionOrNull()?.message}"
+                    "Gagal: ${cmd.take(60)} — ${result.exceptionOrNull()?.message}"
                 )
             }
         }

@@ -1,6 +1,7 @@
 package com.example
 
 import android.provider.Settings
+import com.example.ui.AppIcons
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -69,7 +70,7 @@ fun SecurityScreen() {
     ) {
         // ── Status keseluruhan ──
         item {
-            SectionCard(title = "ANTIVIRUS", icon = Icons.Rounded.Security) {
+            SectionCard(title = "ANTIVIRUS", icon = AppIcons.Shield) {
                 val headline = when {
                     results.isEmpty() -> "Belum ada hasil pemindaian"
                     threats.isNotEmpty() -> "${threats.size} aplikasi berisiko"
@@ -77,8 +78,8 @@ fun SecurityScreen() {
                 }
                 val headlineColor = when {
                     results.isEmpty() -> Color.White.copy(alpha = 0.6f)
-                    threats.isNotEmpty() -> Color(0xFFFB923C)
-                    else -> Color(0xFF4DE082)
+                    threats.isNotEmpty() -> Color(0xFFE9B949)
+                    else -> Color(0xFF4CC38A)
                 }
                 Text(headline, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = headlineColor)
                 Text(
@@ -96,7 +97,7 @@ fun SecurityScreen() {
                 modifier = Modifier.fillMaxWidth(),
                 color = Color.White.copy(alpha = 0.04f),
                 shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
+                border = BorderStroke(1.dp, com.example.ui.theme.HairLine)
             ) {
                 Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(
@@ -119,7 +120,7 @@ fun SecurityScreen() {
                             "Izinkan \"Tampil di atas aplikasi lain\" agar peringatan bisa muncul langsung di layar. " +
                                 "Tanpa itu, peringatan tetap muncul lewat notifikasi.",
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFFFB923C)
+                            color = Color(0xFFE9B949)
                         )
                     }
                 }
@@ -132,7 +133,7 @@ fun SecurityScreen() {
                 modifier = Modifier.fillMaxWidth(),
                 color = Color.White.copy(alpha = 0.04f),
                 shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
+                border = BorderStroke(1.dp, com.example.ui.theme.HairLine)
             ) {
                 Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(
@@ -170,7 +171,6 @@ fun SecurityScreen() {
             Text(
                 "HASIL PEMINDAIAN (${results.size})",
                 style = MaterialTheme.typography.labelSmall,
-                letterSpacing = 2.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(top = 8.dp)

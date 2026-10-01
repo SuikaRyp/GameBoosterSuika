@@ -36,8 +36,7 @@ class PowerOptimizer(
     @Volatile
     private var bootOptimizerRan = false
 
-    @Volatile
-    private var lastDexOptimizeTime: Long = 0L
+    private val lastDexOptimizeByPkg = java.util.concurrent.ConcurrentHashMap<String, Long>()
 
     private val DEX_OPTIMIZE_COOLDOWN = 7 * 24 * 60 * 60 * 1000L // 7 días entre compilaciones
 
@@ -63,70 +62,21 @@ class PowerOptimizer(
     }
 
     /**
-     * Cierra apps en segundo plano para liberar RAM + CPU.
+     * Menutup proses latar belakang dengan `am kill-all`: hanya proses cached yang aman dibunuh sistem.
      *
-     * Usa `am force-stop` (verificado que funciona desde shell UID 2000)
-     * en lugar de `cmd activity idle-systems` que no existe en AOSP.
-     *
-     * @param packageName Opcional: si se pasa, NO cierra este paquete (el juego activo)
+     * Sebelumnya memakai `am force-stop` pada daftar proses hasil dumpsys — itu bisa ikut mematikan
+     * keyboard (IME), Shizuku, aplikasi mapper (FF Mouse), atau aplikasi telepon di tengah game.
+     * `kill-all` tidak menyentuh aplikasi foreground/layanan aktif/IME, jadi aman.
      */
-    fun suspendCachedApps(packageName: String? = null) {
-        repository.logAsync("DEBUG", "PowerOpt", "💤 Menutup aplikasi latar belakang...")
+    fun suspendCachedApps(@Suppress("UNUSED_PARAMETER") packageName: String? = null) {
+        repository.logAsync("DEBUG", "PowerOpt", "💤 Menutup proses cache latar belakang (am kill-all)...")
         scope.launch {
-            var successCount = 0
-            var failCount = 0
-
-            // Obtener procesos en background
-            val result = ShizukuExecutor.runCommand(
-                "dumpsys activity processes | grep 'ProcessRecord{' | grep -v 'pid=0' | grep -oE ':[0-9a-f]+ [^ ]+' | awk '{print \$2}'"
-            )
-
-            val processes = if (result.isSuccess) {
-                result.getOrNull()?.split("\n")
-                    ?.map { it.trim() }
-                    ?.filter { it.isNotBlank() && it.contains(".") && !it.startsWith("com.android.") && !it.startsWith("android") }
-                    ?.distinct()
-                    ?.filter { it != packageName }
-                    ?.take(15)
-                    ?: emptyList()
+            val result = ShizukuExecutor.runCommand("am kill-all")
+            if (result.isSuccess) {
+                repository.logAsync("INFO", "PowerOpt", "💤 Proses cache latar belakang ditutup")
             } else {
-                // Fallback: obtener procesos vía ps
-                repository.logAsync("WARN", "PowerOpt", "⚠️ dumpsys gagal, memakai fallback ps...")
-                val fallbackResult = ShizukuExecutor.runCommand("ps -A | grep u0_a | awk '{print \$NF}' | grep -E '^com\\.' | head -20")
-                if (fallbackResult.isFailure) {
-                    repository.logAsync("WARN", "PowerOpt", "❌ Fallback juga gagal")
-                    return@launch
-                }
-                fallbackResult.getOrNull()
-                    ?.split("\n")
-                    ?.map { it.trim() }
-                    ?.filter { it.isNotBlank() && it.contains(".") }
-                    ?.distinct()
-                    ?.filter { it != packageName }
-                    ?.take(10)
-                    ?: emptyList()
+                repository.logAsync("WARN", "PowerOpt", "❌ am kill-all gagal: ${result.exceptionOrNull()?.message?.take(80)}")
             }
-
-            if (processes.isEmpty()) {
-                repository.logAsync("DEBUG", "PowerOpt", "📭 Tidak ada proses latar belakang untuk ditutup")
-                return@launch
-            }
-
-            repository.logAsync("DEBUG", "PowerOpt", "📋 ${processes.size} proses kandidat: ${processes.take(5).joinToString(", ")}...")
-
-            // Cerrar cada proceso con am force-stop ✅ (verificado que funciona)
-            for (pkg in processes) {
-                val forceResult = ShizukuExecutor.runCommand("am force-stop $pkg")
-                if (forceResult.isSuccess) {
-                    successCount++
-                } else {
-                    failCount++
-                    repository.logAsync("DEBUG", "PowerOpt", "⚠️ Gagal menutup $pkg: ${forceResult.exceptionOrNull()?.message?.take(60)}")
-                }
-                delay(50)
-            }
-
-            repository.logAsync("INFO", "PowerOpt", "💤 $successCount aplikasi ditutup, $failCount gagal")
         }
     }
 
@@ -141,7 +91,7 @@ class PowerOptimizer(
      */
     fun dexOptimize(packageName: String) {
         val now = System.currentTimeMillis()
-        if (now - lastDexOptimizeTime < DEX_OPTIMIZE_COOLDOWN) {
+        if (now - (lastDexOptimizeByPkg[packageName] ?: 0L) < DEX_OPTIMIZE_COOLDOWN) {
             repository.logAsync("DEBUG", "PowerOpt", "⏭️ Dex optimize dalam cooldown (7 hari). Dilewati.")
             return
         }
@@ -150,7 +100,7 @@ class PowerOptimizer(
         scope.launch {
             val result = ShizukuExecutor.runCommand("cmd package compile -f -m speed $packageName")
             if (result.isSuccess) {
-                lastDexOptimizeTime = now
+                lastDexOptimizeByPkg[packageName] = now
                 repository.logAsync("INFO", "PowerOpt", "✅ $packageName terkompilasi ke speed")
             } else {
                 repository.logAsync("WARN", "PowerOpt", "❌ Dex compile gagal: ${result.exceptionOrNull()?.message}")
@@ -201,8 +151,8 @@ class PowerOptimizer(
         val idleState = ShizukuExecutor.runCommand("dumpsys deviceidle get deep")
         sb.appendLine("Device Idle: ${idleState.getOrNull()?.trim() ?: "Tidak tersedia"}")
 
-        sb.appendLine("Boot Optimizer: ${if (bootOptimizerRan) "✅ Sudah dijalankan" else "⏳ Tertunda"}")
-        sb.appendLine("Dex Cooldown: ${if (System.currentTimeMillis() - lastDexOptimizeTime < DEX_OPTIMIZE_COOLDOWN) "⏳ Dalam cooldown" else "✅ Siap"}")
+        sb.appendLine("Boot Optimizer: ${if (bootOptimizerRan) "Sudah dijalankan" else "Tertunda"}")
+        sb.appendLine("Dex dikompilasi (per paket): ${lastDexOptimizeByPkg.size}")
 
         sb.appendLine("══════════════════════════════════")
         return sb.toString()

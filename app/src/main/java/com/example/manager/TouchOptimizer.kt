@@ -45,6 +45,9 @@ class TouchOptimizer(
 
             commands.add("settings put secure accessibility_display_magnification_enabled 0")
             commands.add("settings put secure accessibility_autoclick_enabled 0")
+            // Overlay debug sentuhan menggambar ulang tiap event sentuh → beban CPU/GPU & latensi
+            commands.add("settings put system show_touches 0")
+            commands.add("settings put system pointer_location 0")
 
             // Un comando por key (no join ";") para no ocultar exit intermedios
             for (cmd in commands) {
@@ -69,6 +72,8 @@ class TouchOptimizer(
             "secure:long_press_timeout",
             "secure:accessibility_display_magnification_enabled",
             "secure:accessibility_autoclick_enabled",
+            "system:show_touches",
+            "system:pointer_location",
         )
         keys.forEach { key ->
             val parts = key.split(":")

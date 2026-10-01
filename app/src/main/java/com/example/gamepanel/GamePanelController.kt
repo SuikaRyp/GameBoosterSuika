@@ -97,9 +97,29 @@ object GamePanelController {
     // Siklus game
     // ────────────────────────────────────────────────────────────────
 
+    /** Game terakhir yang dilaporkan service (dipakai saat saklar Panel Manager dinyalakan lagi). */
+    @Volatile private var lastReportedPkg: String? = null
+
     /** Dipanggil dari service setiap kali game aktif berubah (null = tidak ada game). */
     fun onGameChanged(pkg: String?) {
-        main.post { if (pkg == null) endGame() else startGame(pkg) }
+        lastReportedPkg = pkg
+        main.post {
+            val c = ctx
+            if (pkg == null || (c != null && !PanelSettings.panelEnabled(c))) endGame() else startGame(pkg)
+        }
+    }
+
+    /**
+     * Saklar utama Panel Manager. Berlaku langsung: OFF → semua overlay dilepas,
+     * ON → kalau game sedang berjalan, panel langsung dipasang lagi.
+     */
+    fun setPanelEnabled(context: Context, enabled: Boolean) {
+        PanelSettings.setPanelEnabled(context, enabled)
+        main.post {
+            if (ctx == null) return@post           // service belum jalan; nilai sudah tersimpan
+            if (!enabled) endGame()
+            else lastReportedPkg?.let { startGame(it) }
+        }
     }
 
     private fun startGame(pkg: String) {

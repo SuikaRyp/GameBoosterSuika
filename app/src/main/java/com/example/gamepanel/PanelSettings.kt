@@ -30,6 +30,11 @@ object PanelSettings {
     private fun p(c: Context): SharedPreferences =
         c.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
+    // ── Saklar utama Panel Manager ──
+    /** false = Game Panel mati total (tanpa edge swipe, panel, HUD, bubble). Default ON agar perilaku lama tidak berubah. */
+    fun panelEnabled(c: Context) = p(c).getBoolean("panel_enabled", true)
+    fun setPanelEnabled(c: Context, v: Boolean) = p(c).edit().putBoolean("panel_enabled", v).apply()
+
     // ── Edge swipe ──
     fun edgeEnabled(c: Context) = p(c).getBoolean("edge_enabled", true)
     fun setEdgeEnabled(c: Context, v: Boolean) = p(c).edit().putBoolean("edge_enabled", v).apply()

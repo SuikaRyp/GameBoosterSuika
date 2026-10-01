@@ -281,7 +281,7 @@ object AntivirusManager {
             val top = r.findings.take(3).joinToString("\n") { "• ${it.title}" }
             val notif = NotificationCompat.Builder(app, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_boost)
-                .setContentTitle("⚠️ ${r.appName}: risiko ${r.level.label}")
+                .setContentTitle("${r.appName}: risiko ${r.level.label}")
                 .setContentText(r.level.headline)
                 .setStyle(NotificationCompat.BigTextStyle().bigText("${r.level.headline}\n$top"))
                 .setPriority(NotificationCompat.PRIORITY_MAX)

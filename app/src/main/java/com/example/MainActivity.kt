@@ -68,7 +68,13 @@ import com.example.service.GameBoostService
 import com.example.service.UnifiedAccessibilityService
 import com.example.ui.FloatingPanelManager
 import com.example.ui.theme.MyApplicationTheme
-import com.example.ui.theme.AccentCyan
+import com.example.ui.theme.Ember
+import com.example.ui.theme.HairLine
+import com.example.ui.theme.Ok
+import com.example.ui.AppIcons
+import com.example.ui.profileIcon
+import com.example.ui.stripEmoji
+import androidx.compose.ui.res.painterResource
 import com.example.ui.theme.WarningOrange
 import com.example.ui.theme.ErrorRed
 import com.example.ui.viewmodel.GameBoostViewModel
@@ -256,18 +262,13 @@ fun GameBoostApp(viewModel: GameBoostViewModel) {
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Icon(
-                            Icons.Rounded.Memory, 
-                            contentDescription = null, 
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(28.dp)
-                        )
-                        Text("GAMEBOOST PRO", fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp)
+                        Image(painterResource(R.drawable.ic_logo_mark), contentDescription = null, modifier = Modifier.size(26.dp))
+                        Text("GameBoost", style = MaterialTheme.typography.titleLarge)
                     }
                 },
                 actions = {
                     IconButton(onClick = { FloatingPanelManager.getInstance(context).toggleVisibility() }) {
-                        Icon(Icons.AutoMirrored.Rounded.ViewQuilt, contentDescription = "Panel", tint = MaterialTheme.colorScheme.primary)
+                        Icon(AppIcons.Grid, contentDescription = "Panel", tint = MaterialTheme.colorScheme.primary)
                     }
                     IconButton(onClick = { 
                         if (!Shizuku.pingBinder()) {
@@ -285,7 +286,7 @@ fun GameBoostApp(viewModel: GameBoostViewModel) {
                         }
                     }) {
                         Icon(
-                            imageVector = if (shizukuConnected) Icons.Rounded.Power else Icons.Rounded.PowerOff,
+                            imageVector = if (shizukuConnected) AppIcons.Usb else AppIcons.Usb,
                             contentDescription = null,
                             tint = if (shizukuConnected) MaterialTheme.colorScheme.secondary else WarningOrange
                         )
@@ -294,19 +295,19 @@ fun GameBoostApp(viewModel: GameBoostViewModel) {
             )
         },
         bottomBar = {
-            NavigationBar(containerColor = Color(0xFF0B1326)) {
+            NavigationBar(containerColor = Color(0xFF0F1318)) {
                 NavigationTab.entries.forEach { tab ->
                     NavigationBarItem(
                         selected = selectedTab == tab,
                         onClick = { selectedTab = tab },
                         icon = { 
                             val icon = when(tab) {
-                                NavigationTab.DASBOR -> Icons.Rounded.Dashboard
-                                NavigationTab.OPTIMASI -> Icons.Rounded.RocketLaunch
-                                NavigationTab.LOG -> Icons.Rounded.History
-                                NavigationTab.DIAGNOSIS -> Icons.Rounded.Analytics
-                                NavigationTab.KEAMANAN -> Icons.Rounded.Security
-                                NavigationTab.KEAMANAN -> Icons.Rounded.Security
+                                NavigationTab.DASBOR -> AppIcons.Dashboard
+                                NavigationTab.OPTIMASI -> AppIcons.Rocket
+                                NavigationTab.LOG -> AppIcons.History
+                                NavigationTab.DIAGNOSIS -> AppIcons.Analytics
+                                NavigationTab.KEAMANAN -> AppIcons.Shield
+                                NavigationTab.KEAMANAN -> AppIcons.Shield
                             }
                             Icon(icon, contentDescription = null)
                         },
@@ -369,15 +370,15 @@ fun DashboardScreen(viewModel: GameBoostViewModel) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         SectionCard(
-            title = "DEPENDENSI SISTEM",
-            icon = Icons.Rounded.Security
+            title = "Dependensi sistem",
+            icon = AppIcons.Shield
         ) {
             val dep = depState
             Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                DependencyRow("Shizuku", dep.shizuku.state.name, dep.shizuku.state == com.example.data.repository.DependencyState.Shizuku.ShizukuState.ON, Icons.Rounded.Usb)
-                DependencyRow("Aksesibilitas", dep.accessibility.state.name, dep.accessibility.state == com.example.data.repository.DependencyState.Accessibility.AccessibilityState.ACTIVE, Icons.Rounded.AccessibilityNew)
-                DependencyRow("Baterai", dep.batteryOptimization.state.name, dep.batteryOptimization.state == com.example.data.repository.DependencyState.BatteryOptimization.BatteryState.UNRESTRICTED, Icons.Rounded.BatteryChargingFull)
-                DependencyRow("GameBoostService", dep.gameBoostService.state.name, dep.gameBoostService.state == com.example.data.repository.DependencyState.GameBoostService.ServiceState.RUNNING, Icons.Rounded.Memory)
+                DependencyRow("Shizuku", dep.shizuku.state.name, dep.shizuku.state == com.example.data.repository.DependencyState.Shizuku.ShizukuState.ON, AppIcons.Usb)
+                DependencyRow("Aksesibilitas", dep.accessibility.state.name, dep.accessibility.state == com.example.data.repository.DependencyState.Accessibility.AccessibilityState.ACTIVE, AppIcons.Accessibility)
+                DependencyRow("Baterai", dep.batteryOptimization.state.name, dep.batteryOptimization.state == com.example.data.repository.DependencyState.BatteryOptimization.BatteryState.UNRESTRICTED, AppIcons.BatteryCharge)
+                DependencyRow("GameBoostService", dep.gameBoostService.state.name, dep.gameBoostService.state == com.example.data.repository.DependencyState.GameBoostService.ServiceState.RUNNING, AppIcons.Cpu)
             }
             if (health.restartCount > 0) {
                 Text(
@@ -390,18 +391,18 @@ fun DashboardScreen(viewModel: GameBoostViewModel) {
         }
 
         SectionCard(
-            title = "KONFIGURASI SAAT INI",
-            icon = Icons.Rounded.Settings
+            title = "Konfigurasi saat ini",
+            icon = AppIcons.Gear
         ) {
-            ConfigRow("Profil", activeProfile?.name ?: "Tidak ada", "🎮")
-            ConfigRow("DPI", "${stats.dpi}", "📱")
-            ConfigRow("Penunjuk", "${currentPointerSpeed}/10", "🖱")
-            ConfigRow("Animasi", stats.animationScale, "⚡")
-            ConfigRow("Refresh Rate", stats.refreshRate, "📺")
-            ConfigRow("Governor", stats.governor, "🖥")
+            ConfigRow("Profil", activeProfile?.name?.stripEmoji() ?: "Tidak ada", AppIcons.Gamepad)
+            ConfigRow("DPI", "${stats.dpi}", AppIcons.Smartphone)
+            ConfigRow("Penunjuk", "${currentPointerSpeed}/10", AppIcons.Mouse)
+            ConfigRow("Animasi", stats.animationScale, AppIcons.Zap)
+            ConfigRow("Refresh Rate", stats.refreshRate, AppIcons.Monitor)
+            ConfigRow("Governor", stats.governor, AppIcons.Cpu)
             
             val externalDevicesConnected by viewModel.externalDevicesConnected.collectAsStateWithLifecycle()
-            ConfigRow("Mobilador", if (externalDevicesConnected) "Terdeteksi ✅" else "Tidak terdeteksi", "🖱")
+            ConfigRow("Mobilador", if (externalDevicesConnected) "Terdeteksi" else "Tidak terdeteksi", AppIcons.Mouse)
         }
 
         SectionCard(
@@ -460,14 +461,50 @@ fun DashboardScreen(viewModel: GameBoostViewModel) {
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Icon(Icons.Rounded.Thermostat, contentDescription = null, tint = WarningOrange, modifier = Modifier.size(20.dp))
+                    Icon(AppIcons.Thermo, contentDescription = null, tint = WarningOrange, modifier = Modifier.size(20.dp))
                     Text("${stats.cpuTemp.toInt()}°C", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Icon(Icons.Rounded.BatteryChargingFull, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
+                    Icon(AppIcons.BatteryCharge, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
                     Text("${stats.batteryLevel}%", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }
             }
+        }
+
+SectionCard(
+            title = "Panel Manager",
+            subtitle = "Game Panel: edge swipe, panel, HUD, bubble",
+            icon = AppIcons.Grid
+        ) {
+            var panelOn by remember { mutableStateOf(com.example.gamepanel.PanelSettings.panelEnabled(context)) }
+            AdvancedToggle(
+                title = "Aktifkan Panel Manager",
+                subtitle = if (panelOn) "Aktif: panel muncul saat game berjalan" else "Nonaktif: tidak ada panel/overlay sama sekali",
+                checked = panelOn,
+                onCheckedChange = {
+                    panelOn = it
+                    com.example.gamepanel.GamePanelController.setPanelEnabled(context, it)
+                }
+            )
+        }
+
+SectionCard(
+            title = "Data Saver Game",
+            subtitle = "Blokir data latar aplikasi lain saat boost",
+            icon = AppIcons.Speed
+        ) {
+            var saverOn by remember {
+                mutableStateOf(PreferenceManager.getPrefBoolean(context, com.example.manager.PerformanceTweaks.PREF_DATA_SAVER_ON_BOOST, true))
+            }
+            AdvancedToggle(
+                title = "Data Saver saat boost",
+                subtitle = "Sync/update aplikasi lain tidak berebut CPU & sinyal dengan game. Game dan app ini tetap online.",
+                checked = saverOn,
+                onCheckedChange = {
+                    saverOn = it
+                    PreferenceManager.setPrefBoolean(context, com.example.manager.PerformanceTweaks.PREF_DATA_SAVER_ON_BOOST, it)
+                }
+            )
         }
 
 // Refresh inmediato de DependencyStateManager al volver de Settings (onResume),
@@ -495,9 +532,9 @@ fun DashboardScreen(viewModel: GameBoostViewModel) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
             StatusCard(
                 modifier = Modifier.weight(1f),
-                title = "SHIZUKU",
+                title = "Shizuku",
                 isActive = shizukuConnected,
-                icon = Icons.Rounded.Usb,
+                icon = AppIcons.Usb,
                 onClick = { 
                     if (!Shizuku.pingBinder()) {
                         try {
@@ -515,9 +552,9 @@ fun DashboardScreen(viewModel: GameBoostViewModel) {
 
             StatusCard(
                 modifier = Modifier.weight(1f),
-                title = "AKSESIBILITAS",
+                title = "Aksesibilitas",
                 isActive = depState.accessibility.state == com.example.data.repository.DependencyState.Accessibility.AccessibilityState.ACTIVE,
-                icon = Icons.Rounded.AccessibilityNew,
+                icon = AppIcons.Accessibility,
                 onClick = {
                     try {
                         context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
@@ -541,7 +578,7 @@ fun DashboardScreen(viewModel: GameBoostViewModel) {
                 ) {
                     Text("Layanan nonaktif — ketuk kartu untuk mengaktifkan",
                          style = MaterialTheme.typography.labelSmall, color = WarningOrange)
-                    Icon(Icons.Rounded.ArrowForward, contentDescription = null, tint = WarningOrange, modifier = Modifier.size(20.dp))
+                    Icon(AppIcons.ArrowRight, contentDescription = null, tint = WarningOrange, modifier = Modifier.size(20.dp))
                 }
             }
         }
@@ -558,8 +595,8 @@ fun DashboardScreen(viewModel: GameBoostViewModel) {
         // --- BOTÓN DE RECONEXIÓN SHIZUKU ---
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)),
-            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            border = BorderStroke(1.dp, HairLine)
         ) {
             Row(
                 modifier = Modifier.padding(12.dp).fillMaxWidth(),
@@ -569,15 +606,15 @@ fun DashboardScreen(viewModel: GameBoostViewModel) {
                 Button(
                     onClick = { 
                         viewModel.toggleShizukuState()
-                        Toast.makeText(context, "🔄 Menghubungkan ulang Shizuku...", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Menghubungkan ulang Shizuku...", Toast.LENGTH_SHORT).show()
                     },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), contentColor = MaterialTheme.colorScheme.primary),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Icon(Icons.Rounded.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(AppIcons.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("HUBUNGKAN ULANG SHIZUKU", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text("Hubungkan ulang Shizuku", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -585,9 +622,9 @@ fun DashboardScreen(viewModel: GameBoostViewModel) {
         // --- TARJETA DE JUEGO DETECTADO ---
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
-            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f)),
-            shape = RoundedCornerShape(16.dp)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            border = BorderStroke(1.dp, HairLine),
+            shape = RoundedCornerShape(12.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -604,7 +641,7 @@ fun DashboardScreen(viewModel: GameBoostViewModel) {
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Rounded.RadioButtonUnchecked,
+                            imageVector = AppIcons.Circle,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(32.dp)
@@ -614,7 +651,7 @@ fun DashboardScreen(viewModel: GameBoostViewModel) {
                     Spacer(modifier = Modifier.width(16.dp))
                     
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("GAME TERDETEKSI", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 1.sp)
+                        Text("Game terdeteksi", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(stats.activeGame ?: "Mencari...", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.White)
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(MaterialTheme.colorScheme.secondary))
@@ -630,10 +667,10 @@ fun DashboardScreen(viewModel: GameBoostViewModel) {
                         onClick = { viewModel.quickClean() },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(10.dp),
-                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
+                        border = BorderStroke(1.dp, HairLine),
                         contentPadding = PaddingValues(0.dp)
                     ) {
-                        Icon(Icons.Rounded.CleaningServices, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Icon(AppIcons.Broom, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
                         Text("Bersihkan Cache", fontSize = 11.sp)
                     }
@@ -641,10 +678,10 @@ fun DashboardScreen(viewModel: GameBoostViewModel) {
                         onClick = { viewModel.quickClean() },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(10.dp),
-                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
+                        border = BorderStroke(1.dp, HairLine),
                         contentPadding = PaddingValues(0.dp)
                     ) {
-                        Icon(Icons.Rounded.ElectricBolt, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Icon(AppIcons.Zap, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
                         Text("Optimalkan RAM", fontSize = 11.sp)
                     }
@@ -653,7 +690,7 @@ fun DashboardScreen(viewModel: GameBoostViewModel) {
         }
 
         // --- AJUSTE DE PANTALLA (DPI) ---
-        SectionCard(title = "PENGATURAN LAYAR", icon = Icons.Rounded.PhoneAndroid) {
+        SectionCard(title = "Pengaturan layar", icon = AppIcons.Smartphone) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("DPI", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text("${DPI_STEPS[dpiIndex]}", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
@@ -698,14 +735,14 @@ fun DashboardScreen(viewModel: GameBoostViewModel) {
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Icon(Icons.Rounded.CheckCircleOutline, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color.Black)
-                    Text("TERAPKAN DPI", fontWeight = FontWeight.ExtraBold, color = Color.Black)
+                    Icon(AppIcons.CheckCircle, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color.Black)
+                    Text("Terapkan DPI", fontWeight = FontWeight.ExtraBold, color = Color.Black)
                 }
             }
         }
 
         // --- AJUSTE DE PUNTERO ---
-        SectionCard(title = "KECEPATAN PENUNJUK", icon = Icons.Rounded.SettingsInputComponent) {
+        SectionCard(title = "Kecepatan penunjuk", icon = AppIcons.Sliders) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("Kecepatan", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text("${pointerSpeedValue.toInt()}/10", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
@@ -734,8 +771,8 @@ fun DashboardScreen(viewModel: GameBoostViewModel) {
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f), contentColor = MaterialTheme.colorScheme.secondary)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Icon(Icons.Rounded.Speed, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Text("TERAPKAN KECEPATAN", fontWeight = FontWeight.ExtraBold)
+                    Icon(AppIcons.Speed, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Text("Terapkan kecepatan", fontWeight = FontWeight.ExtraBold)
                 }
             }
         }
@@ -776,8 +813,8 @@ fun DependencyRow(
 fun StatusCard(modifier: Modifier, title: String, isActive: Boolean, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
     Card(
         modifier = modifier.clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        border = BorderStroke(1.dp, HairLine),
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(
@@ -829,9 +866,9 @@ fun SectionCard(
         Spacer(modifier = Modifier.height(12.dp))
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
-            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f)),
-            shape = RoundedCornerShape(16.dp)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            border = BorderStroke(1.dp, HairLine),
+            shape = RoundedCornerShape(12.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 content()
@@ -864,7 +901,7 @@ fun BoostScreen(viewModel: GameBoostViewModel) {
     ) {
         item {
             Column {
-                Text("MESIN INTI", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, letterSpacing = 2.sp, fontWeight = FontWeight.Bold)
+                Text("Mesin inti", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text("Profil Performa", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Color.White)
                     Surface(
@@ -889,10 +926,10 @@ fun BoostScreen(viewModel: GameBoostViewModel) {
                 onClick = { showCreateDialog = true },
                 modifier = Modifier.fillMaxWidth().height(54.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.05f), contentColor = Color.White),
-                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+                colors = ButtonDefaults.buttonColors(containerColor = HairLine, contentColor = Color.White),
+                border = BorderStroke(1.dp, HairLine)
             ) {
-                Icon(Icons.Rounded.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                Icon(AppIcons.Plus, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Profil Kustom", fontWeight = FontWeight.SemiBold)
             }
@@ -900,19 +937,18 @@ fun BoostScreen(viewModel: GameBoostViewModel) {
 
         item {
             Spacer(modifier = Modifier.height(24.dp))
-            Text("PENGATURAN LANJUTAN", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, letterSpacing = 2.sp, fontWeight = FontWeight.Bold)
+            Text("Pengaturan lanjutan", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(12.dp))
             
             val isAggressive by viewModel.isAggressiveOptimizationEnabled.collectAsStateWithLifecycle()
             val isThermalWatchdog by viewModel.isThermalWatchdogEnabled.collectAsStateWithLifecycle()
             val isAutoDetect by viewModel.isAutoDetectGamesEnabled.collectAsStateWithLifecycle()
             val isDeepSleep by viewModel.isDeepSleepEnabled.collectAsStateWithLifecycle()
-            val isMsaa by viewModel.isMsaaEnabled.collectAsStateWithLifecycle()
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF111827)),
-                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f)),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF12171D)),
+                border = BorderStroke(1.dp, HairLine),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -920,7 +956,6 @@ fun BoostScreen(viewModel: GameBoostViewModel) {
                     AdvancedToggle("Watchdog Termal", "Pantau dan cegah panas berlebih", isThermalWatchdog) { viewModel.toggleThermalWatchdog() }
                     AdvancedToggle("Deteksi Game Otomatis", "Aktifkan profil secara otomatis", isAutoDetect) { viewModel.toggleAutoDetectGames() }
                     AdvancedToggle("Optimasi Saat Layar Mati", "Hemat sumber daya saat layar mati", isDeepSleep) { viewModel.toggleDeepSleep() }
-                    AdvancedToggle("MSAA 4x", "Meningkatkan kualitas grafis (berat di GPU, bisa menurunkan FPS di HP kelas menengah)", isMsaa) { viewModel.toggleMsaa() }
                 }
             }
         }
@@ -939,14 +974,15 @@ fun AdvancedToggle(title: String, subtitle: String, checked: Boolean, onCheckedC
 }
 
 @Composable
-fun ConfigRow(label: String, value: String, icon: String) {
+fun ConfigRow(label: String, value: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(icon, modifier = Modifier.width(24.dp))
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Text(value, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
@@ -954,7 +990,7 @@ fun ConfigRow(label: String, value: String, icon: String) {
 }
 
 // Color naranja para perfil activo (gaming/performance)
-private val ActiveProfileOrange = Color(0xFFFF9100)
+private val ActiveProfileOrange = Color(0xFFFF8A3D)
 
 @Composable
 fun ProfileCardCompact(profile: ProfileEntity, onClick: () -> Unit) {
@@ -965,13 +1001,13 @@ fun ProfileCardCompact(profile: ProfileEntity, onClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().clickable { onClick() }.padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isActive) Color(0xFF1A2744) else Color(0xFF111827)
+            containerColor = if (isActive) Color(0xFF20262F) else Color(0xFF12171D)
         ),
         border = BorderStroke(
             width = if (isActive) 2.dp else 1.dp,
-            color = if (isActive) activeColor.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.05f)
+            color = if (isActive) activeColor.copy(alpha = 0.6f) else HairLine
         ),
-        shape = RoundedCornerShape(14.dp)
+        shape = RoundedCornerShape(10.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -982,7 +1018,7 @@ fun ProfileCardCompact(profile: ProfileEntity, onClick: () -> Unit) {
                         .clip(RoundedCornerShape(10.dp))
                         .background(
                             if (isActive) activeColor.copy(alpha = activeBackgroundAlpha)
-                            else Color.White.copy(alpha = 0.05f)
+                            else HairLine
                         )
                         .then(
                             if (isActive) Modifier.border(1.5.dp, activeColor.copy(alpha = 0.4f), RoundedCornerShape(10.dp))
@@ -990,14 +1026,14 @@ fun ProfileCardCompact(profile: ProfileEntity, onClick: () -> Unit) {
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(profile.icon, fontSize = 24.sp)
+                    Icon(profileIcon(profile.icon), contentDescription = null, tint = if (isActive) activeColor else MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(24.dp))
                 }
                 
                 Spacer(modifier = Modifier.width(14.dp))
                 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        profile.name,
+                        profile.name.stripEmoji(),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.ExtraBold,
                         color = if (isActive) activeColor else Color.White
@@ -1030,12 +1066,11 @@ fun ProfileCardCompact(profile: ProfileEntity, onClick: () -> Unit) {
                                     .background(activeColor)
                             )
                             Text(
-                                "AKTIF",
+                                "Aktif",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = activeColor,
-                                fontSize = 9.sp,
-                                letterSpacing = 1.sp
+                                fontSize = 9.sp
                             )
                         }
                     }
@@ -1045,8 +1080,8 @@ fun ProfileCardCompact(profile: ProfileEntity, onClick: () -> Unit) {
             Spacer(modifier = Modifier.height(14.dp))
             
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                ProfileTag(Icons.Rounded.SettingsInputComponent, profile.governor, isActive)
-                ProfileTag(Icons.Rounded.SettingsSystemDaydream, "${profile.refreshRate} Hz", isActive)
+                ProfileTag(AppIcons.Sliders, profile.governor, isActive)
+                ProfileTag(AppIcons.Monitor, "${profile.refreshRate} Hz", isActive)
             }
         }
     }
@@ -1097,7 +1132,7 @@ private fun EvidenceStatusRow(label: String, value: String, alive: Boolean, deta
             modifier = Modifier
                 .size(10.dp)
                 .clip(CircleShape)
-                .background(if (alive) Color(0xFF00E676) else Color(0xFF546E7A))
+                .background(if (alive) Color(0xFF4CC38A) else Color(0xFF546E7A))
         )
         Spacer(modifier = Modifier.width(10.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -1106,22 +1141,22 @@ private fun EvidenceStatusRow(label: String, value: String, alive: Boolean, deta
                 Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        Text(value, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = if (alive) Color(0xFF00E676) else MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(value, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = if (alive) Color(0xFF4CC38A) else MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 @Composable
 private fun EvidenceChip(text: String, good: Boolean) {
     Surface(
-        color = if (good) Color(0xFF00E676).copy(alpha = 0.12f) else Color(0xFFFF9800).copy(alpha = 0.12f),
+        color = if (good) Color(0xFF4CC38A).copy(alpha = 0.12f) else Color(0xFFFF9800).copy(alpha = 0.12f),
         shape = RoundedCornerShape(6.dp),
-        border = BorderStroke(1.dp, (if (good) Color(0xFF00E676) else Color(0xFFFF9800)).copy(alpha = 0.3f))
+        border = BorderStroke(1.dp, (if (good) Color(0xFF4CC38A) else Color(0xFFFF9800)).copy(alpha = 0.3f))
     ) {
         Text(
             text,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
             style = MaterialTheme.typography.labelSmall,
-            color = if (good) Color(0xFF00E676) else Color(0xFFFF9800)
+            color = if (good) Color(0xFF4CC38A) else Color(0xFFFF9800)
         )
     }
 }
@@ -1163,25 +1198,25 @@ private fun relativeAge(timestamp: String): String {
  */
 private fun activityCategory(tag: String): Triple<String, Color, androidx.compose.ui.graphics.vector.ImageVector> = when (tag) {
     "Optimizer", "GameMode", "Mobilador", "DPI", "Pointer" ->
-        Triple("BOOST", Color(0xFF2FD9F4), Icons.Rounded.RocketLaunch)
+        Triple("BOOST", Color(0xFFFF8A3D), AppIcons.Rocket)
     "SysTweaks", "NetworkOpt", "RamManager", "GamingDND" ->
-        Triple("OPTIMASI", Color(0xFF4DE082), Icons.Rounded.CleaningServices)
+        Triple("OPTIMASI", Color(0xFF4CC38A), AppIcons.Broom)
     else ->
-        Triple("SISTEM", Color(0xFFCFBCFF), Icons.Rounded.Memory)
+        Triple("SISTEM", Color(0xFFD9B38C), AppIcons.Cpu)
 }
 
 @Composable
 private fun ActivityFilterChip(label: String, dotColor: Color, selected: Boolean, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
-        color = if (selected) Color(0xFF2FD9F4).copy(alpha = 0.18f) else Color(0xFF171F33).copy(alpha = 0.6f),
+        color = if (selected) Color(0xFFFF8A3D).copy(alpha = 0.18f) else Color(0xFF161B22).copy(alpha = 0.6f),
         shape = RoundedCornerShape(50),
-        border = BorderStroke(1.dp, if (selected) Color(0xFF2FD9F4).copy(alpha = 0.5f) else Color.White.copy(alpha = 0.05f))
+        border = BorderStroke(1.dp, if (selected) Color(0xFFFF8A3D).copy(alpha = 0.5f) else HairLine)
     ) {
         Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(dotColor))
             Spacer(modifier = Modifier.width(6.dp))
-            Text(label, style = MaterialTheme.typography.labelSmall, fontSize = 11.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium, color = if (selected) Color(0xFF8AEBFF) else Color.White.copy(alpha = 0.6f))
+            Text(label, style = MaterialTheme.typography.labelSmall, fontSize = 11.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium, color = if (selected) Color(0xFFFF8A3D) else Color.White.copy(alpha = 0.6f))
         }
     }
 }
@@ -1212,40 +1247,40 @@ fun LogsScreen(viewModel: GameBoostViewModel) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Aktivitas", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Color.White)
             Spacer(modifier = Modifier.width(8.dp))
-            Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF4DE082)))
+            Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF4CC38A)))
             Spacer(modifier = Modifier.weight(1f))
-            EvidenceChip(text = "LANGSUNG", good = true)
+            EvidenceChip(text = "Langsung", good = true)
         }
         Text("Bukti nyata Game Boost", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
         // Resumen superior 3 columnas (mockup) — datos reales
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            color = Color(0xFF1A2338),
-            shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, Color(0xFF2FD9F4).copy(alpha = 0.22f))
+            color = Color(0xFF1B2129),
+            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(1.dp, Color(0xFFFF8A3D).copy(alpha = 0.22f))
         ) {
             Row(modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                ActivitySummaryCell("KEJADIAN", "${recent.size}", Color.White, Modifier.weight(1f))
+                ActivitySummaryCell("Kejadian", "${recent.size}", Color.White, Modifier.weight(1f))
                 Box(modifier = Modifier.width(1.dp).height(28.dp).background(Color.White.copy(alpha = 0.08f)))
-                ActivitySummaryCell("KEJADIAN TERAKHIR", recent.firstOrNull()?.let { relativeAge(it.timestamp) } ?: "—", Color(0xFF8AEBFF), Modifier.weight(1f))
+                ActivitySummaryCell("Kejadian terakhir", recent.firstOrNull()?.let { relativeAge(it.timestamp) } ?: "—", Color(0xFFFF8A3D), Modifier.weight(1f))
                 Box(modifier = Modifier.width(1.dp).height(28.dp).background(Color.White.copy(alpha = 0.08f)))
-                ActivitySummaryCell("STATUS MESIN", if (boostActive) "AKTIF" else "NONAKTIF", if (boostActive) Color(0xFF4DE082) else Color.White.copy(alpha = 0.5f), Modifier.weight(1f))
+                ActivitySummaryCell("Status mesin", if (boostActive) "AKTIF" else "NONAKTIF", if (boostActive) Color(0xFF4CC38A) else Color.White.copy(alpha = 0.5f), Modifier.weight(1f))
             }
         }
 
         // Filtros funcionales por categoría real de tag
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ActivityFilterChip("Semua", Color(0xFF8AEBFF), activityFilter == "ALL") { activityFilter = "ALL" }
-            ActivityFilterChip("Boost", Color(0xFF2FD9F4), activityFilter == "BOOST") { activityFilter = "BOOST" }
-            ActivityFilterChip("Optimasi", Color(0xFF4DE082), activityFilter == "OPT") { activityFilter = "OPT" }
-            ActivityFilterChip("Sistem", Color(0xFFCFBCFF), activityFilter == "SYS") { activityFilter = "SYS" }
+            ActivityFilterChip("Semua", Color(0xFFFF8A3D), activityFilter == "ALL") { activityFilter = "ALL" }
+            ActivityFilterChip("Boost", Color(0xFFFF8A3D), activityFilter == "BOOST") { activityFilter = "BOOST" }
+            ActivityFilterChip("Optimasi", Color(0xFF4CC38A), activityFilter == "OPT") { activityFilter = "OPT" }
+            ActivityFilterChip("Sistem", Color(0xFFD9B38C), activityFilter == "SYS") { activityFilter = "SYS" }
         }
 
         // ── Evidencia de sesión (snapshot SSOT persistido — acciones reales) ──
         SectionCard(
-            title = "BUKTI SESI",
-            icon = Icons.Rounded.FactCheck,
+            title = "Bukti sesi",
+            icon = AppIcons.ClipboardCheck,
             subtitle = session?.let { "sesi ${it.sessionId?.takeLast(8) ?: "—"} · mulai ${java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date(it.updatedAt))}" }
         ) {
             if (session == null) {
@@ -1292,7 +1327,7 @@ fun LogsScreen(viewModel: GameBoostViewModel) {
         }
 
         // ── Última restauración (reporte verificado por relectura) ──
-        SectionCard(title = "PEMULIHAN TERAKHIR", icon = Icons.Rounded.RestartAlt) {
+        SectionCard(title = "Pemulihan terakhir", icon = AppIcons.Restart) {
             val rep = lastRestore
             if (rep == null) {
                 Text(
@@ -1306,7 +1341,7 @@ fun LogsScreen(viewModel: GameBoostViewModel) {
                 val conflicts = rep.results.values.count { it == RestoreResult.RESTORE_CONFLICT }
                 val failed = rep.results.values.count { it == RestoreResult.RESTORE_FAILED }
                 EvidenceChip(
-                    text = if (rep.allOk) "SELESAI DAN TERVERIFIKASI" else "ADA KEGAGALAN — RECOVERY TERTUNDA",
+                    text = if (rep.allOk) "Selesai dan terverifikasi" else "Ada kegagalan — pemulihan tertunda",
                     good = rep.allOk
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -1325,7 +1360,7 @@ fun LogsScreen(viewModel: GameBoostViewModel) {
             Canvas(modifier = Modifier.matchParentSize().padding(start = 11.dp, top = 8.dp, bottom = 8.dp)) {
                 drawLine(
                     brush = Brush.verticalGradient(
-                        listOf(Color(0xFF2FD9F4).copy(alpha = 0.5f), Color(0xFF4DE082).copy(alpha = 0.3f), Color.White.copy(alpha = 0.05f))
+                        listOf(Color(0xFFFF8A3D).copy(alpha = 0.5f), Color(0xFF4CC38A).copy(alpha = 0.3f), HairLine)
                     ),
                     start = Offset(0f, 0f),
                     end = Offset(0f, size.height),
@@ -1336,7 +1371,7 @@ fun LogsScreen(viewModel: GameBoostViewModel) {
                 if (filtered.isEmpty()) {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        color = Color(0xFF171F33).copy(alpha = 0.65f),
+                        color = Color(0xFF161B22).copy(alpha = 0.65f),
                         shape = RoundedCornerShape(12.dp),
                         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
                     ) {
@@ -1356,7 +1391,7 @@ fun LogsScreen(viewModel: GameBoostViewModel) {
                         // Dot del timeline
                         Box(modifier = Modifier.width(24.dp), contentAlignment = Alignment.Center) {
                             Box(
-                                modifier = Modifier.size(14.dp).clip(CircleShape).background(Color(0xFF0B1326)).border(2.dp, catColor, CircleShape),
+                                modifier = Modifier.size(14.dp).clip(CircleShape).background(Color(0xFF0F1318)).border(2.dp, catColor, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Box(modifier = Modifier.size(5.dp).clip(CircleShape).background(catColor))
@@ -1366,7 +1401,7 @@ fun LogsScreen(viewModel: GameBoostViewModel) {
                         // Tarjeta del evento con barra de acento
                         Surface(
                             modifier = Modifier.weight(1f),
-                            color = Color(0xFF171F33).copy(alpha = 0.65f),
+                            color = Color(0xFF161B22).copy(alpha = 0.65f),
                             shape = RoundedCornerShape(12.dp),
                             border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
                         ) {
@@ -1392,7 +1427,7 @@ fun LogsScreen(viewModel: GameBoostViewModel) {
                                         Text(relativeAge(log.timestamp), style = MaterialTheme.typography.labelSmall, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
                                     Spacer(modifier = Modifier.height(6.dp))
-                                    Text(log.message, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.9f))
+                                    Text(log.message.stripEmoji(), style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.9f))
                                 }
                             }
                         }
@@ -1438,22 +1473,22 @@ fun DiagnosticScreen(viewModel: GameBoostViewModel) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            color = if (allOk) Color(0xFF00E676).copy(alpha = 0.08f) else WarningOrange.copy(alpha = 0.08f),
-            border = BorderStroke(1.dp, (if (allOk) Color(0xFF00E676) else WarningOrange).copy(alpha = 0.3f))
+            color = if (allOk) Color(0xFF4CC38A).copy(alpha = 0.08f) else WarningOrange.copy(alpha = 0.08f),
+            border = BorderStroke(1.dp, (if (allOk) Color(0xFF4CC38A) else WarningOrange).copy(alpha = 0.3f))
         ) {
             Row(modifier = Modifier.fillMaxWidth().padding(14.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    if (allOk) Icons.Rounded.HealthAndSafety else Icons.Rounded.Warning,
+                    if (allOk) AppIcons.ShieldTouch else AppIcons.Alert,
                     contentDescription = null,
-                    tint = if (allOk) Color(0xFF00E676) else WarningOrange,
+                    tint = if (allOk) Color(0xFF4CC38A) else WarningOrange,
                     modifier = Modifier.size(22.dp)
                 )
                 Column {
                     Text(
-                        if (allOk) "SISTEM BERJALAN NORMAL" else "SISTEM MENGALAMI PENURUNAN",
+                        if (allOk) "Sistem berjalan normal" else "Sistem mengalami penurunan",
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
-                        color = if (allOk) Color(0xFF00E676) else WarningOrange
+                        color = if (allOk) Color(0xFF4CC38A) else WarningOrange
                     )
                     Text(
                         "$componentsReady/5 komponen siap",
@@ -1466,17 +1501,17 @@ fun DiagnosticScreen(viewModel: GameBoostViewModel) {
 
         // ── MÓDULOS DE ARQUITECTURA: los 5 componentes con estado real ──
         SectionCard(
-            title = "MODUL ARSITEKTUR",
+            title = "Modul arsitektur",
             subtitle = "$componentsReady/5 siap",
-            icon = Icons.Rounded.Memory
+            icon = AppIcons.Cpu
         ) {
-            ComponentCard("Shizuku", if (shizukuReady) "TERSEDIA" else "TIDAK TERSEDIA", shizukuReady, Icons.Rounded.Usb)
+            ComponentCard("Shizuku", if (shizukuReady) "Tersedia" else "Tidak tersedia", shizukuReady, AppIcons.Usb)
             Spacer(modifier = Modifier.height(8.dp))
-            ComponentCard("Watchdog", if (serviceRunning) "AKTIF" else "BERHENTI", serviceRunning, Icons.Rounded.HealthAndSafety)
+            ComponentCard("Watchdog", if (serviceRunning) "AKTIF" else "Berhenti", serviceRunning, AppIcons.ShieldTouch)
             Spacer(modifier = Modifier.height(8.dp))
-            ComponentCard("Game Detection", if (detectorOk) "MENDETEKSI" else "DINONAKTIFKAN", detectorOk, Icons.Rounded.SportsEsports)
+            ComponentCard("Game Detection", if (detectorOk) "Mendeteksi" else "Dinonaktifkan", detectorOk, AppIcons.Gamepad)
             Spacer(modifier = Modifier.height(8.dp))
-            ComponentCard("Accessibility", if (a11yActive) "AKTIF" else "NONAKTIF", a11yActive, Icons.Rounded.AccessibilityNew)
+            ComponentCard("Accessibility", if (a11yActive) "AKTIF" else "NONAKTIF", a11yActive, AppIcons.Accessibility)
             Spacer(modifier = Modifier.height(8.dp))
             ComponentCard(
                 "Boost Engine (FSM)",
@@ -1488,12 +1523,12 @@ fun DiagnosticScreen(viewModel: GameBoostViewModel) {
                     FsmState.RECOVERING -> "DALAM PEMULIHAN"
                 },
                 fsm == FsmState.GAME_ACTIVE || fsm == FsmState.READY,
-                Icons.Rounded.ElectricBolt
+                AppIcons.Zap
             )
         }
 
         // ── SHIZUKU RUNTIME: solo campos con fuente real (diagnose()) ──
-        SectionCard(title = "SHIZUKU RUNTIME", subtitle = if (shizukuReady) "TERSEDIA" else "TIDAK TERSEDIA", icon = Icons.Rounded.Usb) {
+        SectionCard(title = "Shizuku runtime", subtitle = if (shizukuReady) "Tersedia" else "Tidak tersedia", icon = AppIcons.Usb) {
             EvidenceStatusRow(
                 "Status layanan",
                 if (shizukuReady) "aktif" else "tidak ada sinyal",
@@ -1505,7 +1540,7 @@ fun DiagnosticScreen(viewModel: GameBoostViewModel) {
                 shizukuReport.ifBlank { "Belum ada diagnosis" },
                 style = MaterialTheme.typography.labelSmall,
                 fontFamily = FontFamily.Monospace,
-                color = AccentCyan,
+                color = Ember,
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
@@ -1513,14 +1548,14 @@ fun DiagnosticScreen(viewModel: GameBoostViewModel) {
             )
             Spacer(modifier = Modifier.height(10.dp))
             OutlinedButton(onClick = { runDiagnosis() }, modifier = Modifier.fillMaxWidth()) {
-                Icon(Icons.Rounded.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                Icon(AppIcons.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("PERIKSA LAYANAN", style = MaterialTheme.typography.labelMedium, letterSpacing = 1.sp)
+                Text("Periksa layanan", style = MaterialTheme.typography.labelMedium)
             }
         }
 
         // ── WATCHDOG MONITOR: HealthStatus real (estado + reinicios + última comprobación) ──
-        SectionCard(title = "WATCHDOG MONITOR", subtitle = if (serviceRunning) "AKTIF" else "BERHENTI", icon = Icons.Rounded.HealthAndSafety) {
+        SectionCard(title = "WATCHDOG MONITOR", subtitle = if (serviceRunning) "AKTIF" else "Berhenti", icon = AppIcons.ShieldTouch) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 MiniStat("STATUS", if (serviceRunning) "Stabil" else "Berhenti", good = serviceRunning, modifier = Modifier.weight(1f))
                 MiniStat("RESTART", "${health.restartCount}", good = health.restartCount == 0, modifier = Modifier.weight(1f))
@@ -1529,7 +1564,7 @@ fun DiagnosticScreen(viewModel: GameBoostViewModel) {
         }
 
         // ── BOOST ENGINE: FSM + sesión persistente (SSOT) ──
-        SectionCard(title = "BOOST ENGINE (FSM)", subtitle = fsm.name, icon = Icons.Rounded.ElectricBolt) {
+        SectionCard(title = "BOOST ENGINE (FSM)", subtitle = fsm.name, icon = AppIcons.Zap) {
             EvidenceStatusRow("Game di latar depan", activeGame ?: "tidak ada", alive = activeGame != null)
             Spacer(modifier = Modifier.height(8.dp))
             EvidenceStatusRow(
@@ -1555,7 +1590,7 @@ fun DiagnosticScreen(viewModel: GameBoostViewModel) {
         }
 
         // ── DIAGNÓSTICO DEL SISTEMA: checklist real (3 checks con fuente) ──
-        SectionCard(title = "DIAGNOSIS SISTEM", subtitle = "pemeriksaan langsung", icon = Icons.Rounded.FactCheck) {
+        SectionCard(title = "DIAGNOSIS SISTEM", subtitle = "pemeriksaan langsung", icon = AppIcons.ClipboardCheck) {
             EvidenceStatusRow("Layanan boost", if (health.serviceAlive) "berjalan" else "berhenti", alive = health.serviceAlive)
             Spacer(modifier = Modifier.height(8.dp))
             EvidenceStatusRow("Tautan aksesibilitas", if (a11yActive) "aktif" else "nonaktif", alive = a11yActive)
@@ -1563,16 +1598,16 @@ fun DiagnosticScreen(viewModel: GameBoostViewModel) {
             EvidenceStatusRow("Baterai tanpa batasan", if (health.batteryUnrestricted) "ok" else "dibatasi", alive = health.batteryUnrestricted)
             Spacer(modifier = Modifier.height(10.dp))
             OutlinedButton(onClick = { runDiagnosis() }, modifier = Modifier.fillMaxWidth()) {
-                Icon(Icons.Rounded.FactCheck, contentDescription = null, modifier = Modifier.size(16.dp))
+                Icon(AppIcons.ClipboardCheck, contentDescription = null, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("JALANKAN PEMERIKSAAN CEPAT", style = MaterialTheme.typography.labelMedium, letterSpacing = 1.sp)
+                Text("JALANKAN PEMERIKSAAN CEPAT", style = MaterialTheme.typography.labelMedium)
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 report.ifBlank { "Belum ada diagnosis" },
                 style = MaterialTheme.typography.labelSmall,
                 fontFamily = FontFamily.Monospace,
-                color = AccentCyan,
+                color = Ember,
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
@@ -1584,7 +1619,7 @@ fun DiagnosticScreen(viewModel: GameBoostViewModel) {
         SectionCard(
             title = "CATATAN TEKNIS SISTEM",
             subtitle = "${techLogs.size} kejadian",
-            icon = Icons.Rounded.History
+            icon = AppIcons.History
         ) {
             if (techLogs.isEmpty()) {
                 Text(
@@ -1607,11 +1642,11 @@ fun DiagnosticScreen(viewModel: GameBoostViewModel) {
                             color = when (log.level) {
                                 "ERROR" -> ErrorRed
                                 "WARN" -> WarningOrange
-                                else -> AccentCyan
+                                else -> Ember
                             }
                         )
                         Text(
-                            "${log.timestamp} ${log.message}",
+                            "${log.timestamp} ${log.message.stripEmoji()}",
                             style = MaterialTheme.typography.labelSmall,
                             fontFamily = FontFamily.Monospace,
                             color = Color.White.copy(alpha = 0.75f),
@@ -1632,20 +1667,20 @@ private fun ComponentCard(name: String, status: String, ok: Boolean, icon: andro
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                if (ok) Color(0xFF00E676).copy(alpha = 0.05f) else WarningOrange.copy(alpha = 0.05f),
+                if (ok) Color(0xFF4CC38A).copy(alpha = 0.05f) else WarningOrange.copy(alpha = 0.05f),
                 RoundedCornerShape(10.dp)
             )
-            .border(1.dp, (if (ok) Color(0xFF00E676) else WarningOrange).copy(alpha = 0.25f), RoundedCornerShape(10.dp))
+            .border(1.dp, (if (ok) Color(0xFF4CC38A) else WarningOrange).copy(alpha = 0.25f), RoundedCornerShape(10.dp))
             .padding(12.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null, tint = if (ok) AccentCyan else WarningOrange, modifier = Modifier.size(18.dp))
+        Icon(icon, contentDescription = null, tint = if (ok) Ember else WarningOrange, modifier = Modifier.size(18.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
-            Text(status, style = MaterialTheme.typography.labelSmall, fontFamily = FontFamily.Monospace, color = if (ok) Color(0xFF00E676) else WarningOrange)
+            Text(status, style = MaterialTheme.typography.labelSmall, color = if (ok) Color(0xFF4CC38A) else WarningOrange)
         }
-        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(if (ok) Color(0xFF00E676) else WarningOrange))
+        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(if (ok) Color(0xFF4CC38A) else WarningOrange))
     }
 }
 
@@ -1664,7 +1699,7 @@ private fun MiniStat(label: String, value: String, good: Boolean, modifier: Modi
             value,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
-            color = if (good) Color(0xFF00E676) else WarningOrange
+            color = if (good) Color(0xFF4CC38A) else WarningOrange
         )
     }
 }
@@ -1679,7 +1714,7 @@ fun CreateProfileDialog(
     var description by remember { mutableStateOf("") }
     var governor by remember { mutableStateOf(availableGovernors.firstOrNull() ?: "schedutil") }
     var refreshRate by remember { mutableFloatStateOf(60f) }
-    var icon by remember { mutableStateOf("🎮") }
+    var icon by remember { mutableStateOf("gamepad") }
     var hyperTouch by remember { mutableStateOf(true) }
     var lowLatency by remember { mutableStateOf(false) }
     var masterFilter by remember { mutableStateOf(true) }
@@ -1687,37 +1722,37 @@ fun CreateProfileDialog(
     var showGovDropdown by remember { mutableStateOf(false) }
 
     Dialog(onDismissRequest = onDismiss) {
-        Card(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.9f), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF0B1326)), border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))) {
+        Card(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.9f), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF0F1318)), border = BorderStroke(1.dp, HairLine)) {
             Column(modifier = Modifier.fillMaxSize()) {
                 Column(modifier = Modifier.padding(24.dp)) {
-                    Text("GAMEBOOST PRO", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, letterSpacing = 2.sp, fontWeight = FontWeight.Bold)
+                    Text("GameBoost", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
                     Text("Kalibrasi Performa", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = Color.White)
                 }
                 Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Nama Profil") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary, unfocusedBorderColor = Color.White.copy(alpha = 0.1f)))
-                        OutlinedTextField(value = description, onValueChange = { description = it }, label = { Text("Deskripsi") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary, unfocusedBorderColor = Color.White.copy(alpha = 0.1f)))
+                        OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Nama Profil") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary, unfocusedBorderColor = HairLine))
+                        OutlinedTextField(value = description, onValueChange = { description = it }, label = { Text("Deskripsi") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary, unfocusedBorderColor = HairLine))
                     }
-                    CalibrationSection(title = "Kontrol Governor", icon = Icons.Rounded.SettingsInputComponent) {
+                    CalibrationSection(title = "Kontrol Governor", icon = AppIcons.Sliders) {
                         Text("Pilih perilaku penskalaan CPU.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 8.dp))
                         
                         Box {
                             Surface(
                                 modifier = Modifier.fillMaxWidth().clickable { showGovDropdown = true },
-                                color = Color.White.copy(alpha = 0.05f),
+                                color = HairLine,
                                 shape = RoundedCornerShape(8.dp),
-                                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+                                border = BorderStroke(1.dp, HairLine)
                             ) {
                                 Row(modifier = Modifier.padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                                     Text(governor, style = MaterialTheme.typography.bodyMedium)
-                                    Icon(Icons.Rounded.ArrowDropDown, contentDescription = null)
+                                    Icon(AppIcons.ArrowDown, contentDescription = null)
                                 }
                             }
                             
                             DropdownMenu(
                                 expanded = showGovDropdown,
                                 onDismissRequest = { showGovDropdown = false },
-                                modifier = Modifier.background(Color(0xFF171F33))
+                                modifier = Modifier.background(Color(0xFF161B22))
                             ) {
                                 availableGovernors.forEach { gov ->
                                     DropdownMenuItem(
@@ -1731,7 +1766,7 @@ fun CreateProfileDialog(
                             }
                         }
                     }
-                    CalibrationSection(title = "Mesin Layar", icon = Icons.Rounded.Screenshot) {
+                    CalibrationSection(title = "Mesin Layar", icon = AppIcons.Screenshot) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text("Target Refresh Rate", style = MaterialTheme.typography.bodySmall)
                             Text("${refreshRate.toInt()}Hz", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
@@ -1739,21 +1774,21 @@ fun CreateProfileDialog(
                         Slider(value = refreshRate, onValueChange = { refreshRate = it }, valueRange = 60f..144f, steps = 3, colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary, activeTrackColor = MaterialTheme.colorScheme.primary))
                         CalibrationToggle(label = "Hyper-Touch Sampling", checked = hyperTouch, onCheckedChange = { hyperTouch = it })
                     }
-                    CalibrationSection(title = "Jalur Jaringan", icon = Icons.Rounded.Wifi) {
+                    CalibrationSection(title = "Jalur Jaringan", icon = AppIcons.Wifi) {
                         CalibrationToggle(label = "Mode Latensi Rendah", checked = lowLatency, onCheckedChange = { lowLatency = it })
                         CalibrationToggle(label = "Pembatasan Data", checked = true, onCheckedChange = {})
                     }
-                    CalibrationSection(title = "Modul Lanjutan", icon = Icons.Rounded.Extension) {
+                    CalibrationSection(title = "Modul Lanjutan", icon = AppIcons.Puzzle) {
                         CalibrationToggle(label = "Master Filter (AI)", checked = masterFilter, onCheckedChange = { masterFilter = it })
                         CalibrationToggle(label = "Afinitas CPU", checked = true, onCheckedChange = {})
                     }
                 }
                 Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Button(onClick = { onSave(name.ifBlank { "Profil Baru" }, description.ifBlank { "Konfigurasi kustom" }, governor, refreshRate.toInt().toString(), icon) }, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = Color.Black)) {
+                    Button(onClick = { onSave(name.ifBlank { "Profil Baru" }, description.ifBlank { "Konfigurasi kustom" }, governor, refreshRate.toInt().toString(), icon) }, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = Color(0xFF1A0F06))) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text("Simpan Profil", fontWeight = FontWeight.Bold)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Icon(AppIcons.ArrowRight, contentDescription = null, modifier = Modifier.size(18.dp))
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
@@ -1791,16 +1826,18 @@ fun HealthBadge(label: String, isAlive: Boolean) {
             modifier = Modifier
                 .size(8.dp)
                 .clip(CircleShape)
-                .background(if (isAlive) Color(0xFF00E676) else ErrorRed)
+                .background(if (isAlive) Color(0xFF4CC38A) else ErrorRed)
         )
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
             color = if (isAlive) Color.White else Color.White.copy(alpha = 0.6f)
         )
-        Text(
-            text = if (isAlive) "✅" else "❌",
-            fontSize = 10.sp
+        Icon(
+            if (isAlive) AppIcons.CheckCircle else AppIcons.XCircle,
+            contentDescription = null,
+            tint = if (isAlive) Ok else ErrorRed,
+            modifier = Modifier.size(12.dp)
         )
     }
 }
@@ -1810,9 +1847,9 @@ fun AccessibilityOnboardingDialog(onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier.fillMaxWidth().fillMaxHeight(0.9f),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF0B1326)),
-            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF0F1318)),
+            border = BorderStroke(1.dp, HairLine)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 Column(modifier = Modifier.padding(24.dp)) {
@@ -1827,13 +1864,13 @@ fun AccessibilityOnboardingDialog(onDismiss: () -> Unit) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Icons.Rounded.BatteryChargingFull, contentDescription = null, tint = WarningOrange, modifier = Modifier.size(20.dp))
+                            Icon(AppIcons.BatteryCharge, contentDescription = null, tint = WarningOrange, modifier = Modifier.size(20.dp))
                             Text("Pengaturan → Baterai → Tanpa batasan untuk GameBoost Pro",
                                  style = MaterialTheme.typography.bodyMedium,
                                  color = MaterialTheme.colorScheme.onSurface)
                         }
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Icons.Rounded.PlayArrow, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
+                            Icon(AppIcons.Play, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
                             Text("Pengaturan → Autostart → Aktif untuk GameBoost Pro",
                                  style = MaterialTheme.typography.bodyMedium,
                                  color = MaterialTheme.colorScheme.onSurface)

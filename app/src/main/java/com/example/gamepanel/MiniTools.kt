@@ -62,7 +62,7 @@ object MiniState {
         val app = ctx.applicationContext
         val r = Runnable {
             tmRunning = false; tmRemaining = 0L
-            GamePanelController.toast("⏱ Timer selesai")
+            GamePanelController.toast("Timer selesai")
             try {
                 val v = app.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) v?.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
@@ -102,7 +102,7 @@ object MiniTools {
 
     fun stopwatch(ctx: Context): View {
         val c = card(ctx)
-        c.addView(tv(ctx, "STOPWATCH", 11f, Pal.cyanSoft, true))
+        c.addView(tv(ctx, "STOPWATCH", 11f, Pal.emberSoft, true))
         val time = tv(ctx, MiniState.fmt(MiniState.swElapsed(), true), 30f, Pal.text, true).apply {
             gravity = Gravity.CENTER
             setPadding(0, ctx.dp(8), 0, ctx.dp(8))
@@ -133,7 +133,7 @@ object MiniTools {
 
     fun timer(ctx: Context): View {
         val c = card(ctx)
-        c.addView(tv(ctx, "TIMER", 11f, Pal.cyanSoft, true))
+        c.addView(tv(ctx, "TIMER", 11f, Pal.emberSoft, true))
         val time = tv(ctx, MiniState.fmt(MiniState.tmLeft(), false), 30f, Pal.text, true).apply {
             gravity = Gravity.CENTER
             setPadding(0, ctx.dp(8), 0, ctx.dp(8))
@@ -168,7 +168,7 @@ object MiniTools {
 
     fun calculator(ctx: Context): View {
         val c = card(ctx)
-        c.addView(tv(ctx, "KALKULATOR", 11f, Pal.cyanSoft, true))
+        c.addView(tv(ctx, "KALKULATOR", 11f, Pal.emberSoft, true))
         val display = tv(ctx, "0", 26f, Pal.text, true).apply {
             gravity = Gravity.END
             setPadding(0, ctx.dp(6), 0, ctx.dp(8))
@@ -193,7 +193,7 @@ object MiniTools {
         fun press(k: String) {
             when (k) {
                 "C" -> { acc = null; op = null; entry = ""; justEq = false; show("0") }
-                "⌫" -> { if (entry.isNotEmpty()) { entry = entry.dropLast(1); show(if (entry.isEmpty()) "0" else entry) } }
+                "DEL" -> { if (entry.isNotEmpty()) { entry = entry.dropLast(1); show(if (entry.isEmpty()) "0" else entry) } }
                 "+", "−", "×", "÷" -> {
                     if (entry.isNotEmpty()) {
                         val b = entry.toDoubleOrNull() ?: 0.0
@@ -226,14 +226,14 @@ object MiniTools {
 
         val keys = listOf(
             listOf("7", "8", "9", "÷"), listOf("4", "5", "6", "×"),
-            listOf("1", "2", "3", "−"), listOf("0", ".", "⌫", "+"),
+            listOf("1", "2", "3", "−"), listOf("0", ".", "DEL", "+"),
             listOf("C", "=")
         )
         for (rowKeys in keys) {
             val row = hbox(ctx)
             for (k in rowKeys) {
                 val isOp = k in listOf("÷", "×", "−", "+", "=")
-                val b = tv(ctx, k, 16f, if (isOp) Pal.cyanSoft else Pal.text, true).apply {
+                val b = tv(ctx, k, 16f, if (isOp) Pal.emberSoft else Pal.text, true).apply {
                     gravity = Gravity.CENTER
                     setPadding(0, ctx.dp(10), 0, ctx.dp(10))
                     background = rounded(Color_alpha(if (isOp) 60 else 35), ctx.dpf(10f))
@@ -252,7 +252,7 @@ object MiniTools {
     /** Catatan cepat. EditText butuh jendela fokus → panel mengaktifkannya hanya saat mengetik. */
     fun notes(ctx: Context, host: PanelWindow): View {
         val c = card(ctx)
-        c.addView(tv(ctx, "CATATAN CEPAT", 11f, Pal.cyanSoft, true))
+        c.addView(tv(ctx, "CATATAN CEPAT", 11f, Pal.emberSoft, true))
         val et = EditText(ctx).apply {
             setText(PanelSettings.notes(ctx))
             setTextColor(Pal.text)

@@ -1,6 +1,7 @@
 package com.example.data.repository
 
 import android.annotation.SuppressLint
+import com.example.ui.stripEmoji
 import android.content.Context
 import android.util.Log
 import com.example.data.PreferenceManager
@@ -412,11 +413,11 @@ class GameBoostRepository private constructor(private val context: Context) {
         if (profileDao.getProfileCount() > 0) return
 
         val defaults = listOf(
-            ProfileEntity("ff_mouse", "FF Mouse Duo", "Dioptimalkan untuk Free Fire dengan mouse/keyboard.", "⌨️", "Performance", "120 Hz", true, false),
-            ProfileEntity("extreme", "Extreme Performance", "Performa penuh untuk game kompetitif.", "🔥", "Unlocked", "Adaptive", false, false),
-            ProfileEntity("free_fire_touch", "Free Fire Touch", "Pengaturan sentuh yang dioptimalkan untuk Free Fire.", "🎯", "Schedutil", "90 Hz", false, false),
-            ProfileEntity("balanced", "Balanced", "Mode campuran untuk pemakaian umum dan gaming.", "⚖️", "Schedutil", "60/90 Hz", false, false),
-            ProfileEntity("battery_saver", "Battery Saver", "Hemat daya, waktu bermain lebih lama.", "🔋", "Powersave", "60 Hz", false, false)
+            ProfileEntity("ff_mouse", "FF Mouse Duo", "Dioptimalkan untuk Free Fire dengan mouse/keyboard.", "mouse", "Performance", "120 Hz", true, false),
+            ProfileEntity("extreme", "Extreme Performance", "Performa penuh untuk game kompetitif.", "flame", "Unlocked", "Adaptive", false, false),
+            ProfileEntity("free_fire_touch", "Free Fire Touch", "Pengaturan sentuh yang dioptimalkan untuk Free Fire.", "target", "Schedutil", "90 Hz", false, false),
+            ProfileEntity("balanced", "Balanced", "Mode campuran untuk pemakaian umum dan gaming.", "sliders", "Schedutil", "60/90 Hz", false, false),
+            ProfileEntity("battery_saver", "Battery Saver", "Hemat daya, waktu bermain lebih lama.", "leaf", "Powersave", "60 Hz", false, false)
         )
         for (p in defaults) profileDao.insertProfile(p)
     }
@@ -490,7 +491,7 @@ class GameBoostRepository private constructor(private val context: Context) {
         val timestamp = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
             .format(java.util.Date())
         repositoryScope.launch {
-            logDao.insertLog(LogEntity(timestamp = timestamp, level = level, tag = tag, message = message))
+            logDao.insertLog(LogEntity(timestamp = timestamp, level = level, tag = tag, message = message.stripEmoji()))
             Log.d(tag, "[$level] $message")
         }
     }

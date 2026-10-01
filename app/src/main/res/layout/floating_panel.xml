@@ -33,12 +33,12 @@
             android:paddingEnd="6dp">
 
             <!-- Profile Icon in Expanded state -->
-            <TextView
+            <ImageView
                 android:id="@+id/tvProfileIconExpanded"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="⚖️"
-                android:textSize="11sp"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_sliders"
+                android:tint="#FFFFFF"
                 android:layout_marginEnd="2dp" />
 
             <View android:layout_width="1dp" android:layout_height="14dp" android:background="#33FFFFFF" android:layout_marginHorizontal="3dp"/>
@@ -51,11 +51,17 @@
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:padding="1dp">
+                <ImageView
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:src="@drawable/ic_thermo"
+                    android:tint="#FFFFFF"
+                    android:layout_marginEnd="3dp" />
                 <TextView
                     android:id="@+id/tvStatTemp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🌡️ --"
+                    android:text="--"
                     android:textSize="9sp"
                     android:textColor="#FFFFFF" />
             </LinearLayout>
@@ -70,11 +76,17 @@
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:padding="1dp">
+                <ImageView
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:src="@drawable/ic_battery"
+                    android:tint="#FFFFFF"
+                    android:layout_marginEnd="3dp" />
                 <TextView
                     android:id="@+id/tvStatBattery"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🔋 --"
+                    android:text="--"
                     android:textSize="9sp"
                     android:textColor="#FFFFFF" />
             </LinearLayout>
@@ -89,11 +101,17 @@
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:padding="1dp">
+                <ImageView
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:src="@drawable/ic_memory"
+                    android:tint="#FFFFFF"
+                    android:layout_marginEnd="3dp" />
                 <TextView
                     android:id="@+id/tvStatRam"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🧠 --"
+                    android:text="--"
                     android:textSize="9sp"
                     android:textColor="#FFFFFF" />
             </LinearLayout>
@@ -108,11 +126,17 @@
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:padding="1dp">
+                <ImageView
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:src="@drawable/ic_globe"
+                    android:tint="#FFFFFF"
+                    android:layout_marginEnd="3dp" />
                 <TextView
                     android:id="@+id/tvStatPing"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🌐 --"
+                    android:text="--"
                     android:textSize="9sp"
                     android:textColor="#FFFFFF" />
             </LinearLayout>
@@ -122,15 +146,13 @@
             <View android:layout_width="1dp" android:layout_height="14dp" android:background="#33FFFFFF" android:layout_marginHorizontal="3dp"/>
 
             <!-- Close btn -->
-            <TextView
+            <ImageView
                 android:id="@+id/btnCollapse"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="✕"
-                android:textSize="14sp"
-                android:textColor="#FFFFFF"
-                android:padding="2dp"
-                android:textStyle="bold" />
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_close"
+                android:tint="#FFFFFF"
+                android:padding="2dp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
@@ -148,13 +170,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <TextView
+            <ImageView
                 android:id="@+id/tvProfileIconSmall"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="⚖️"
-                android:textSize="14sp" />
+                android:padding="6dp"
+                android:src="@drawable/ic_sliders"
+                android:tint="#FFFFFF" />
 
             <!-- We keep these for compatibility but hidden -->
             <ImageView

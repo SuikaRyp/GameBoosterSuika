@@ -3,23 +3,26 @@ package com.example.ui.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
-    primary = PrimaryNeonCyan,
+    primary = Ember,
     onPrimary = TextDark,
-    primaryContainer = PrimaryContainerCyan,
+    primaryContainer = EmberDeep,
     onPrimaryContainer = TextOnSurface,
-    secondary = SecondaryGreen,
+    secondary = Ok,
     onSecondary = TextDark,
-    secondaryContainer = SecondaryContainerGreen,
+    secondaryContainer = OkDeep,
     onSecondaryContainer = TextOnSurface,
-    background = BackgroundBlue,
+    background = InkBg,
     onBackground = TextOnSurface,
-    surface = SurfaceBlue,
+    surface = InkSurface,
     onSurface = TextOnSurface,
-    surfaceVariant = CardBlue,
+    surfaceVariant = InkCard,
     onSurfaceVariant = TextMuted,
-    outline = TextMuted
+    outline = Color(0xFF3A4350),
+    outlineVariant = HairLine,
+    error = ErrorRed
 )
 
 @Composable

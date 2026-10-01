@@ -49,15 +49,11 @@ class NetworkOptimizer(
         // --- Private DNS real (DoT) — keys correctas de Android ---
         // hostname = modo strict en la UI de Ajustes
         "settings put global private_dns_mode hostname",
-        "settings put global private_dns_specifier dns.google",
-
-        "settings put global wifi_watchdog_on 0",
-        "settings put global wifi_scan_interval_ms 300000", // 5 min
-
-        // --- Latencia (Neon Core) ---
-        "settings put global wifi_power_save 0",
-        "settings put global wifi_low_latency_mode 1",
-        "settings put global wifi_bt_coexistence 0" // Priorizar WiFi sobre BT
+        "settings put global private_dns_specifier dns.google"
+        // Dibuang (tidak ada efek di Android 8+ — key tidak dibaca framework):
+        // wifi_watchdog_on, wifi_scan_interval_ms, wifi_power_save, wifi_low_latency_mode,
+        // wifi_bt_coexistence. Latensi jaringan game ditangani Data Saver (PerformanceTweaks)
+        // yang memblokir trafik latar aplikasi lain.
     )
 
     // ── API Pública ──────────────────────────────────────────────
@@ -98,7 +94,6 @@ class NetworkOptimizer(
         scope.launch {
             val mode = originalDnsMode?.takeIf { it.isNotBlank() && it != "null" } ?: "off"
             val specifier = originalDnsSpecifier?.takeIf { it.isNotBlank() && it != "null" } ?: ""
-            val wifiBt = originalWifiBtCoex?.takeIf { it.isNotBlank() && it != "null" } ?: "1"
 
             // El specifier solo se escribe si el usuario tenía uno; si estaba
             // ausente, se restaura la ausencia (un put con valor vacío produce
@@ -111,7 +106,7 @@ class NetworkOptimizer(
             } else {
                 restoreCmds.add("settings delete global private_dns_specifier")
             }
-            restoreCmds.add("settings put global wifi_bt_coexistence $wifiBt")
+            // wifi_bt_coexistence tidak lagi diubah (tidak berefek) → tidak perlu dipulihkan
 
             for (cmd in restoreCmds) {
                 ShizukuExecutor.runCommand(cmd)

@@ -155,10 +155,10 @@ class FloatingPanelManager(private val appContext: Context) {
         if (!isVisible || floatingView == null || !isExpanded) return
         
         floatingView?.post {
-            floatingView?.findViewById<TextView>(R.id.tvStatTemp)?.text = "🌡️ ${metrics.cpuTemp.toInt()}°C"
-            floatingView?.findViewById<TextView>(R.id.tvStatBattery)?.text = "⚡ ${metrics.batteryLevel}%"
-            floatingView?.findViewById<TextView>(R.id.tvStatRam)?.text = "🧠 ${(metrics.ramUsed / 1024.0).format(1)}GB"
-            floatingView?.findViewById<TextView>(R.id.tvStatPing)?.text = "🌐 ${metrics.ping}ms"
+            floatingView?.findViewById<TextView>(R.id.tvStatTemp)?.text = "${metrics.cpuTemp.toInt()}°C"
+            floatingView?.findViewById<TextView>(R.id.tvStatBattery)?.text = "${metrics.batteryLevel}%"
+            floatingView?.findViewById<TextView>(R.id.tvStatRam)?.text = "${(metrics.ramUsed / 1024.0).format(1)}GB"
+            floatingView?.findViewById<TextView>(R.id.tvStatPing)?.text = "${metrics.ping}ms"
         }
     }
 
@@ -176,8 +176,8 @@ class FloatingPanelManager(private val appContext: Context) {
     private fun updateProfileDisplay(profile: ProfileManager.ProfileType, view: View?) {
         val v = view ?: floatingView ?: return
         
-        v.findViewById<TextView>(R.id.tvProfileIconSmall)?.text = profile.icon
-        v.findViewById<TextView>(R.id.tvProfileIconExpanded)?.text = profile.icon
+        v.findViewById<android.widget.ImageView>(R.id.tvProfileIconSmall)?.setImageResource(profile.iconRes)
+        v.findViewById<android.widget.ImageView>(R.id.tvProfileIconExpanded)?.setImageResource(profile.iconRes)
         
         val panelCard = v.findViewById<androidx.cardview.widget.CardView>(R.id.panelCard)
         panelCard?.setCardBackgroundColor(

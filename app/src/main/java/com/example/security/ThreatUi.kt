@@ -19,11 +19,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 fun RiskLevel.uiColor(): Color = when (this) {
-    RiskLevel.AMAN -> Color(0xFF4DE082)
-    RiskLevel.RENDAH -> Color(0xFF8AEBFF)
-    RiskLevel.SEDANG -> Color(0xFFFB923C)
-    RiskLevel.TINGGI -> Color(0xFFEF4444)
-    RiskLevel.KRITIS -> Color(0xFFFF1744)
+    RiskLevel.AMAN -> Color(0xFF4CC38A)
+    RiskLevel.RENDAH -> Color(0xFF8FA3BD)
+    RiskLevel.SEDANG -> Color(0xFFE9B949)
+    RiskLevel.TINGGI -> Color(0xFFE5534B)
+    RiskLevel.KRITIS -> Color(0xFFFF5A4F)
 }
 
 @Composable

@@ -1,6 +1,7 @@
 package com.example.manager
 
 import android.content.Context
+import com.example.ui.stripEmoji
 import com.example.R
 import com.example.data.PreferenceManager
 import kotlinx.coroutines.launch
@@ -28,13 +29,16 @@ object ProfileManager {
         val animationScale: Int,
         val thermalOverride: Boolean = false
     ) {
-        EXTREME("🔥 EXTREME", "🔥", R.drawable.ic_extreme, 5, "performance", "120", 7, 0, true),
-        ADS("⌨️ FF MOUSE", "⌨️", R.drawable.ic_ads, 4, "performance", "120", 5, 0),
-        GAMING("🎮 GAMING", "🎮", R.drawable.ic_gaming, 3, "performance", "120", 6, 0),
-        FREE_FIRE_TOUCH("🎯 FREE FIRE", "🎯", R.drawable.ic_gaming, 3, "performance", "120", 6, 0),
-        BALANCED("⚖️ BALANCED", "⚖️", R.drawable.ic_balanced, 2, "schedutil", "60", 5, 1),
-        POWER_SAVE("🔋 POWER SAVE", "🔋", R.drawable.ic_power_save, 1, "powersave", "60", 3, 1);
+        EXTREME("🔥 EXTREME", "🔥", R.drawable.ic_flame, 5, "performance", "120", 7, 0, true),
+        ADS("⌨️ FF MOUSE", "⌨️", R.drawable.ic_mouse, 4, "performance", "120", 5, 0),
+        GAMING("🎮 GAMING", "🎮", R.drawable.ic_gamepad, 3, "performance", "120", 6, 0),
+        FREE_FIRE_TOUCH("🎯 FREE FIRE", "🎯", R.drawable.ic_target, 3, "performance", "120", 6, 0),
+        BALANCED("⚖️ BALANCED", "⚖️", R.drawable.ic_sliders, 2, "schedutil", "60", 5, 1),
+        POWER_SAVE("🔋 POWER SAVE", "🔋", R.drawable.ic_leaf, 1, "powersave", "60", 3, 1);
         
+        /** Nama tanpa emoji untuk ditampilkan ke pengguna. [displayName] tetap dipakai untuk pencocokan data lama. */
+        val label: String get() = displayName.stripEmoji()
+
         companion object {
             fun fromPriority(priority: Int): ProfileType {
                 return values().find { it.priority == priority } ?: BALANCED
@@ -89,14 +93,17 @@ object ProfileManager {
             repository.executePrivilegedCommands(commands, tag = "ProfileApply")
 
             // Especiales para Táctil y Puntero
-            if (profile == ProfileType.ADS || profile == ProfileType.EXTREME) {
-                repository.setPointerSpeed(profile.pointerSpeed * 10) // Mapear 0-10 a 0-100%
-                if (profile == ProfileType.ADS && !repository.isMobiladorActive.value) {
-                    repository.toggleMobilador()
+            when (profile) {
+                ProfileType.ADS -> {
+                    // FF Mouse: Mode Mobilador sudah menyetel pointer_speed maksimum + long-press cepat.
+                    // Jangan menimpa pointer_speed lagi (sebelumnya balapan dengan setPointerSpeed 50%).
+                    if (!repository.isMobiladorActive.value) repository.toggleMobilador()
                 }
+                ProfileType.EXTREME -> repository.setPointerSpeed(profile.pointerSpeed * 10) // 0-10 → 0-100%
+                else -> Unit
             }
         }
-        
+
         return true
     }
 }

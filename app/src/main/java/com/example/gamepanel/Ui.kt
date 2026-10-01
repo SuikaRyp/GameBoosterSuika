@@ -1,6 +1,8 @@
 package com.example.gamepanel
 
 import android.content.Context
+import android.widget.ImageView
+import androidx.annotation.DrawableRes
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -20,24 +22,26 @@ import android.widget.TextView
 
 /** Palet gelap + aksen cyan (mengikuti tema app). */
 object Pal {
-    val bg = Color.rgb(11, 19, 38)
-    val card = Color.argb(60, 255, 255, 255)
-    val cardSolid = Color.rgb(23, 31, 51)
-    val stroke = Color.argb(40, 138, 235, 255)
-    val text = Color.WHITE
-    val muted = Color.rgb(170, 180, 198)
-    val cyan = Color.rgb(34, 211, 238)
-    val cyanSoft = Color.rgb(138, 235, 255)
-    val green = Color.rgb(77, 224, 130)
-    val orange = Color.rgb(251, 146, 60)
-    val red = Color.rgb(239, 68, 68)
-    val yellow = Color.rgb(255, 213, 79)
+    val bg = Color.rgb(15, 19, 24)
+    val card = Color.argb(22, 255, 255, 255)
+    val cardSolid = Color.rgb(22, 27, 34)
+    val stroke = Color.argb(34, 255, 255, 255)
+    val text = Color.rgb(232, 235, 240)
+    val muted = Color.rgb(147, 160, 177)
+    val ember = Color.rgb(255, 122, 26)
+    val emberSoft = Color.rgb(255, 160, 96)
+    val onAccent = Color.rgb(26, 15, 6)
+    val green = Color.rgb(76, 195, 138)
+    val orange = Color.rgb(233, 185, 73)
+    val red = Color.rgb(229, 83, 75)
+    val yellow = Color.rgb(233, 185, 73)
 
+    /** Kunci tema tersimpan tetap ("cyan","green","orange","purple") supaya setelan lama tidak rusak. */
     fun accent(theme: String): Int = when (theme) {
         "green" -> green
         "orange" -> orange
-        "purple" -> Color.rgb(196, 160, 255)
-        else -> cyan
+        "purple" -> Color.rgb(112, 168, 254)
+        else -> ember
     }
 }
 
@@ -74,28 +78,46 @@ fun hbox(ctx: Context, pad: Int = 0): LinearLayout = LinearLayout(ctx).apply {
 }
 
 fun card(ctx: Context): LinearLayout = vbox(ctx, ctx.dp(12)).apply {
-    background = rounded(Pal.card, ctx.dpf(14f), Pal.stroke, 1)
+    background = rounded(Pal.card, ctx.dpf(12f), Pal.stroke, 1)
     layoutParams = LinearLayout.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
     ).also { it.bottomMargin = ctx.dp(8) }
 }
 
 fun sectionTitle(ctx: Context, text: String): TextView =
-    tv(ctx, text.uppercase(), 11f, Pal.cyanSoft, true).apply {
-        letterSpacing = 0.12f
+    tv(ctx, text, 12f, Pal.muted, true).apply {
         setPadding(ctx.dp(2), ctx.dp(8), 0, ctx.dp(6))
     }
+
+/** ImageView berisi ikon vektor (SVG) dengan warna [tint]. */
+fun iconView(ctx: Context, @DrawableRes res: Int, sizeDp: Int = 24, tint: Int = Pal.text): ImageView =
+    ImageView(ctx).apply {
+        setImageResource(res)
+        setColorFilter(tint)
+        scaleType = ImageView.ScaleType.FIT_CENTER
+        layoutParams = ViewGroup.LayoutParams(ctx.dp(sizeDp), ctx.dp(sizeDp))
+    }
+
+/** Ikon vektor di kiri teks (menggantikan emoji di depan label). */
+fun TextView.leftIcon(@DrawableRes res: Int, tint: Int, sizeDp: Int = 16) {
+    val d = androidx.core.content.ContextCompat.getDrawable(context, res)?.mutate() ?: return
+    d.setTint(tint)
+    val px = (sizeDp * resources.displayMetrics.density + 0.5f).toInt()
+    d.setBounds(0, 0, px, px)
+    setCompoundDrawablesRelative(d, null, null, null)
+    compoundDrawablePadding = (6 * resources.displayMetrics.density + 0.5f).toInt()
+}
 
 fun spacer(ctx: Context, h: Int): View = View(ctx).apply {
     layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ctx.dp(h))
 }
 
 fun button(ctx: Context, text: String, primary: Boolean = true, onClick: () -> Unit): TextView =
-    tv(ctx, text, 13f, if (primary) Color.BLACK else Pal.text, true).apply {
+    tv(ctx, text, 13f, if (primary) Pal.onAccent else Pal.text, true).apply {
         gravity = Gravity.CENTER
         setPadding(ctx.dp(14), ctx.dp(10), ctx.dp(14), ctx.dp(10))
-        background = if (primary) rounded(Pal.cyan, ctx.dpf(12f))
-        else rounded(Color.argb(40, 255, 255, 255), ctx.dpf(12f), Pal.stroke, 1)
+        background = if (primary) rounded(Pal.ember, ctx.dpf(10f))
+        else rounded(Color.argb(22, 255, 255, 255), ctx.dpf(10f), Pal.stroke, 1)
         isClickable = true
         setOnClickListener { onClick() }
     }
@@ -122,7 +144,7 @@ fun seekRow(
 ): View {
     val col = vbox(ctx).apply { setPadding(0, ctx.dp(4), 0, ctx.dp(4)) }
     val head = hbox(ctx)
-    val valueTv = tv(ctx, fmt(value), 12f, Pal.cyanSoft, true)
+    val valueTv = tv(ctx, fmt(value), 12f, Pal.emberSoft, true)
     head.addView(tv(ctx, label, 13f, Pal.text, true), lp(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
     head.addView(valueTv)
     val sb = SeekBar(ctx).apply {
@@ -147,7 +169,7 @@ class Segmented(
     private val ctx: Context,
     private val options: List<String>,
     selected: Int,
-    private val accent: Int = Pal.cyanSoft,
+    private val accent: Int = Pal.emberSoft,
     private val onSelect: (Int) -> Unit
 ) {
     val view: LinearLayout = LinearLayout(ctx)
@@ -155,7 +177,7 @@ class Segmented(
 
     init {
         view.orientation = LinearLayout.HORIZONTAL
-        view.background = rounded(Color.argb(50, 255, 255, 255), ctx.dpf(12f))
+        view.background = rounded(Color.argb(24, 255, 255, 255), ctx.dpf(10f))
         view.setPadding(ctx.dp(3), ctx.dp(3), ctx.dp(3), ctx.dp(3))
         options.forEachIndexed { i, o ->
             val t = tv(ctx, o, 12f, Pal.muted, true).apply {
@@ -172,8 +194,8 @@ class Segmented(
     fun select(i: Int, notify: Boolean) {
         items.forEachIndexed { idx, t ->
             if (idx == i) {
-                t.setTextColor(Color.BLACK)
-                t.background = rounded(accent, ctx.dpf(10f))
+                t.setTextColor(Pal.onAccent)
+                t.background = rounded(accent, ctx.dpf(8f))
             } else {
                 t.setTextColor(Pal.muted)
                 t.background = null
@@ -183,19 +205,18 @@ class Segmented(
     }
 }
 
-/** Tile alat: lingkaran ikon (emoji) + label. Aktif → disorot aksen. */
-class ToolTile(private val ctx: Context, emoji: String, label: String, private val onClick: () -> Unit) {
+/** Tile alat: kotak ikon vektor + label. Aktif → disorot aksen. */
+class ToolTile(private val ctx: Context, @DrawableRes iconRes: Int, label: String, private val onClick: () -> Unit) {
     val view: LinearLayout = LinearLayout(ctx)
     private val iconBox = FrameLayout(ctx)
-    private val icon = tv(ctx, emoji, 22f)
+    private val icon = iconView(ctx, iconRes, 24, Pal.text)
     private val labelTv = tv(ctx, label, 11f, Pal.text)
 
     init {
         view.orientation = LinearLayout.VERTICAL
         view.gravity = Gravity.CENTER_HORIZONTAL
         view.setPadding(ctx.dp(2), ctx.dp(6), ctx.dp(2), ctx.dp(6))
-        icon.gravity = Gravity.CENTER
-        iconBox.addView(icon, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER))
+        iconBox.addView(icon, FrameLayout.LayoutParams(ctx.dp(24), ctx.dp(24), Gravity.CENTER))
         view.addView(iconBox, LinearLayout.LayoutParams(ctx.dp(52), ctx.dp(52)))
         labelTv.gravity = Gravity.CENTER
         labelTv.maxLines = 2
@@ -206,9 +227,10 @@ class ToolTile(private val ctx: Context, emoji: String, label: String, private v
     }
 
     fun setActive(active: Boolean) {
-        iconBox.background = if (active) rounded(Color.argb(200, 34, 211, 238), ctx.dpf(16f))
-        else rounded(Color.argb(60, 255, 255, 255), ctx.dpf(16f))
-        labelTv.setTextColor(if (active) Pal.cyanSoft else Pal.text)
+        iconBox.background = if (active) rounded(Pal.ember, ctx.dpf(14f))
+        else rounded(Color.argb(22, 255, 255, 255), ctx.dpf(14f), Pal.stroke, 1)
+        icon.setColorFilter(if (active) Pal.onAccent else Pal.text)
+        labelTv.setTextColor(if (active) Pal.emberSoft else Pal.text)
     }
 
     fun setLabel(t: String) { labelTv.text = t }
@@ -217,7 +239,7 @@ class ToolTile(private val ctx: Context, emoji: String, label: String, private v
 /** Gauge lingkar: persen dengan busur; null → "N/A". */
 class GaugeView(ctx: Context, private val title: String) : View(ctx) {
     private var value: Int? = null
-    private var accent: Int = Pal.cyan
+    private var accent: Int = Pal.ember
     private val track = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE; strokeWidth = ctx.dpf(6f); color = Color.argb(50, 255, 255, 255)
         strokeCap = Paint.Cap.ROUND

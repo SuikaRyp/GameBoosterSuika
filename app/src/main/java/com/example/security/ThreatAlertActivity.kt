@@ -1,6 +1,7 @@
 package com.example.security
 
 import android.content.Context
+import com.example.ui.AppIcons
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -122,7 +123,7 @@ class ThreatAlertActivity : ComponentActivity() {
             if (pkg == null) {
                 LaunchedEffect(Unit) { finish() }
             }
-            Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF0B1326)) {}
+            Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF0F1318)) {}
             return
         }
 
@@ -169,7 +170,7 @@ private fun AlertContent(
     val isThreat = r.level.rank >= AntivirusManager.ALERT_MIN_LEVEL.rank
     val fmt = remember { SimpleDateFormat("dd MMM yyyy HH:mm", Locale("id", "ID")) }
 
-    Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF0B1326)) {
+    Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF0F1318)) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -192,7 +193,7 @@ private fun AlertContent(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Icon(
-                        if (isThreat) Icons.Rounded.Warning else Icons.Rounded.CheckCircle,
+                        if (isThreat) AppIcons.Alert else AppIcons.CheckCircle,
                         contentDescription = null,
                         tint = color,
                         modifier = Modifier.size(64.dp)
@@ -257,7 +258,6 @@ private fun AlertContent(
                     Text(
                         "TEMUAN (${r.findings.size})",
                         style = MaterialTheme.typography.labelSmall,
-                        letterSpacing = 2.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -299,7 +299,7 @@ private fun AlertContent(
                             .fillMaxWidth()
                             .height(52.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444), contentColor = Color.White)
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE5534B), contentColor = Color.White)
                     ) {
                         Text("HAPUS APLIKASI", fontWeight = FontWeight.ExtraBold)
                     }

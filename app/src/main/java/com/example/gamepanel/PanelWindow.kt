@@ -29,13 +29,13 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlin.math.abs
 
-enum class PanelTab(val emoji: String, val label: String) {
-    TOOLS("🎮", "Alat Game"),
-    PERF("📈", "Kinerja"),
-    NET("🌐", "Jaringan"),
-    TOUCH("👆", "Sentuhan"),
-    GAMES("🕹️", "Game"),
-    SETTINGS("⚙️", "Setelan")
+enum class PanelTab(@androidx.annotation.DrawableRes val icon: Int, val label: String) {
+    TOOLS(com.example.R.drawable.ic_gamepad, "Alat Game"),
+    PERF(com.example.R.drawable.ic_trend, "Kinerja"),
+    NET(com.example.R.drawable.ic_globe, "Jaringan"),
+    TOUCH(com.example.R.drawable.ic_touch, "Sentuhan"),
+    GAMES(com.example.R.drawable.ic_grid, "Game"),
+    SETTINGS(com.example.R.drawable.ic_gear, "Setelan")
 }
 
 /** Layout yang menutup panel bila pengguna menggeser ke kanan (kebalikan dari gestur buka). */
@@ -83,7 +83,7 @@ class PanelWindow(private val ctx: Context) {
 
     private lateinit var contentHost: FrameLayout
     private lateinit var headerMetrics: TextView
-    private val railItems = ArrayList<Pair<PanelTab, TextView>>()
+    private val railItems = ArrayList<Pair<PanelTab, LinearLayout>>()
     private var currentTab = PanelTab.TOOLS
     private var toolsRefresher: (() -> Unit)? = null
 
@@ -117,7 +117,7 @@ class PanelWindow(private val ctx: Context) {
         val accent = Pal.accent(PanelSettings.theme(ctx))
         val alpha = (PanelSettings.panelOpacity(ctx) * 255 / 100).coerceIn(90, 255)
         val c = SwipeCloseLayout(ctx) { GamePanelController.closePanel() }
-        c.background = rounded(Color.argb(alpha, 11, 19, 38), ctx.dpf(22f), (accent and 0x00FFFFFF) or 0x66000000, ctx.dp(1))
+        c.background = rounded(Color.argb(alpha, 15, 19, 24), ctx.dpf(18f), (accent and 0x00FFFFFF) or 0x55000000, ctx.dp(1))
         c.elevation = ctx.dpf(16f)
         c.clipToOutline = true
 
@@ -213,9 +213,15 @@ class PanelWindow(private val ctx: Context) {
         val col = vbox(ctx, ctx.dp(4))
         col.gravity = Gravity.CENTER_HORIZONTAL
         for (t in PanelTab.values()) {
-            val item = tv(ctx, "${t.emoji}\n${t.label}", 10.5f, Pal.muted, true).apply {
+            val item = LinearLayout(ctx).apply {
+                orientation = LinearLayout.VERTICAL
                 gravity = Gravity.CENTER
                 setPadding(ctx.dp(2), ctx.dp(8), ctx.dp(2), ctx.dp(8))
+                addView(iconView(ctx, t.icon, 22, Pal.muted), LinearLayout.LayoutParams(ctx.dp(22), ctx.dp(22)))
+                addView(
+                    tv(ctx, t.label, 10f, Pal.muted, true).apply { gravity = Gravity.CENTER },
+                    LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).also { it.topMargin = ctx.dp(3) }
+                )
                 setOnClickListener { selectTab(t) }
             }
             railItems.add(t to item)
@@ -246,8 +252,10 @@ class PanelWindow(private val ctx: Context) {
     private fun styleRail(accent: Int) {
         for ((t, v) in railItems) {
             val on = t == currentTab
-            v.setTextColor(if (on) accent else Pal.muted)
-            v.background = if (on) rounded(Color.argb(40, 255, 255, 255), ctx.dpf(12f)) else null
+            val c = if (on) accent else Pal.muted
+            (v.getChildAt(0) as ImageView).setColorFilter(c)
+            (v.getChildAt(1) as TextView).setTextColor(c)
+            v.background = if (on) rounded(Color.argb(28, 255, 255, 255), ctx.dpf(10f)) else null
         }
     }
 
@@ -260,13 +268,13 @@ class PanelWindow(private val ctx: Context) {
 
         val header = vbox(ctx, ctx.dp(10))
         val top = hbox(ctx)
-        val title = tv(ctx, "GAME BOOSTER  ·  ${GamePanelController.gameName}", 13f, accent, true).apply {
+        val title = tv(ctx, "Game Booster  ·  ${GamePanelController.gameName}", 13f, accent, true).apply {
             maxLines = 1
             ellipsize = android.text.TextUtils.TruncateAt.END
         }
         top.addView(title, lp(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-        top.addView(iconBtn("—") { GamePanelController.minimize() })
-        top.addView(iconBtn("✕") { GamePanelController.closePanel() })
+        top.addView(iconBtn(com.example.R.drawable.ic_minus) { GamePanelController.minimize() }, LinearLayout.LayoutParams(ctx.dp(38), ctx.dp(38)))
+        top.addView(iconBtn(com.example.R.drawable.ic_close) { GamePanelController.closePanel() }, LinearLayout.LayoutParams(ctx.dp(38), ctx.dp(38)))
         header.addView(top)
         headerMetrics = tv(ctx, "Mengukur…", 11f, Pal.text).apply { setPadding(0, ctx.dp(4), 0, 0) }
         header.addView(headerMetrics)
@@ -278,10 +286,9 @@ class PanelWindow(private val ctx: Context) {
         return col
     }
 
-    private fun iconBtn(t: String, onClick: () -> Unit): TextView =
-        tv(ctx, t, 15f, Pal.text, true).apply {
-            gravity = Gravity.CENTER
-            setPadding(ctx.dp(12), ctx.dp(4), ctx.dp(12), ctx.dp(4))
+    private fun iconBtn(@androidx.annotation.DrawableRes res: Int, onClick: () -> Unit): ImageView =
+        iconView(ctx, res, 18, Pal.text).apply {
+            setPadding(ctx.dp(10), ctx.dp(10), ctx.dp(10), ctx.dp(10))
             setOnClickListener { onClick() }
         }
 
@@ -337,7 +344,7 @@ class PanelWindow(private val ctx: Context) {
         parts.add("GPU ${s.gpuPct?.let { "$it%" } ?: "N/A"}")
         parts.add("RAM ${s.ramPct}%")
         parts.add(s.tempC?.let { String.format(java.util.Locale.US, "%.0f°C", it) } ?: "Suhu N/A")
-        parts.add("🔋${s.batteryPct?.let { "$it%" } ?: "N/A"}")
+        parts.add("Bat ${s.batteryPct?.let { "$it%" } ?: "N/A"}")
         headerMetrics.text = parts.joinToString("  ·  ")
         try { pageUpdater?.invoke(s) } catch (e: Exception) { Log.w(TAG, "updater: ${e.message}") }
     }
